@@ -1,0 +1,1493 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DataQuiz · Gestión de Metadatos & Calidad de Datos</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #05080f;
+  --surface: #0d1525;
+  --surface2: #131d30;
+  --border: #1e2d45;
+  --accent: #00e5ff;
+  --accent2: #ff6b35;
+  --accent3: #7c3aed;
+  --gold: #ffd700;
+  --silver: #c0c0c0;
+  --bronze: #cd7f32;
+  --green: #00ff88;
+  --red: #ff3b5c;
+  --text: #e8f4ff;
+  --muted: #5a7a9a;
+  --font-display: 'Syne', sans-serif;
+  --font-mono: 'Space Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-display);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── NOISE TEXTURE OVERLAY ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+/* ── GRID BACKGROUND ── */
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background-image: linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
+.screen {
+  position: fixed; inset: 0; z-index: 10;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 20px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.4s ease;
+  overflow-y: auto;
+}
+.screen.active { opacity: 1; pointer-events: all; }
+
+/* ══════════════════ SCREEN: LOBBY ══════════════════ */
+#screen-lobby { gap: 32px; }
+
+.logo-badge {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.logo-badge .tag {
+  font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: 4px;
+  color: var(--accent); text-transform: uppercase;
+  border: 1px solid var(--accent);
+  padding: 4px 14px; border-radius: 2px;
+}
+.logo-title {
+  font-size: clamp(42px, 8vw, 80px);
+  font-weight: 800; line-height: 0.9;
+  letter-spacing: -3px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent3) 60%, var(--accent2) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-align: center;
+}
+.logo-sub {
+  font-family: var(--font-mono); font-size: 12px;
+  color: var(--muted); letter-spacing: 2px; text-align: center;
+  max-width: 500px; line-height: 1.8;
+}
+
+.lobby-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 36px 40px;
+  width: 100%; max-width: 480px;
+  position: relative; overflow: hidden;
+}
+.lobby-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent3), var(--accent2));
+}
+.lobby-card h2 {
+  font-size: 18px; font-weight: 700; margin-bottom: 24px;
+  color: var(--text);
+}
+
+.input-group { margin-bottom: 18px; }
+.input-group label {
+  display: block; font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: 2px; color: var(--muted);
+  text-transform: uppercase; margin-bottom: 8px;
+}
+.input-group input, .input-group select {
+  width: 100%; padding: 14px 16px;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text);
+  font-family: var(--font-display); font-size: 15px;
+  outline: none; transition: border-color 0.2s;
+}
+.input-group input:focus, .input-group select:focus {
+  border-color: var(--accent);
+}
+.input-group select option { background: var(--bg); }
+
+.btn-primary {
+  width: 100%; padding: 16px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent3) 100%);
+  border: none; border-radius: 8px;
+  color: var(--bg); font-family: var(--font-display);
+  font-size: 16px; font-weight: 800; letter-spacing: 1px;
+  cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
+  text-transform: uppercase;
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0,229,255,0.3);
+}
+.btn-primary:active { transform: translateY(0); }
+
+.players-waiting {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px 32px;
+  width: 100%; max-width: 480px;
+}
+.players-waiting h3 {
+  font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 3px; color: var(--accent);
+  text-transform: uppercase; margin-bottom: 16px;
+}
+#players-list {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  min-height: 40px;
+}
+.player-chip {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 100px; padding: 6px 14px 6px 6px;
+  font-size: 13px; animation: popIn 0.3s ease;
+}
+.player-chip .avatar {
+  width: 26px; height: 26px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+}
+@keyframes popIn {
+  from { transform: scale(0.7); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+.btn-start {
+  width: 100%; max-width: 480px;
+  padding: 18px; margin-top: 4px;
+  background: linear-gradient(135deg, var(--accent2) 0%, var(--gold) 100%);
+  border: none; border-radius: 8px;
+  color: var(--bg); font-family: var(--font-display);
+  font-size: 17px; font-weight: 800; letter-spacing: 2px;
+  cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
+  text-transform: uppercase; display: none;
+}
+.btn-start.visible { display: block; }
+.btn-start:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 40px rgba(255,107,53,0.4);
+}
+
+/* ══════════════════ SCREEN: GAME ══════════════════ */
+#screen-game {
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 0;
+  gap: 0;
+}
+
+.game-header {
+  width: 100%; background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 24px;
+  display: flex; align-items: center;
+  justify-content: space-between; gap: 16px;
+  flex-wrap: wrap;
+  position: sticky; top: 0; z-index: 20;
+}
+.game-header-left {
+  display: flex; align-items: center; gap: 20px;
+}
+.q-counter {
+  font-family: var(--font-mono); font-size: 13px; color: var(--muted);
+}
+.q-counter span { color: var(--accent); font-weight: 700; }
+
+.timer-wrap {
+  display: flex; align-items: center; gap: 10px;
+}
+.timer-label { font-family: var(--font-mono); font-size: 11px; color: var(--muted); letter-spacing: 2px; }
+.timer-display {
+  font-family: var(--font-mono); font-size: 28px; font-weight: 700;
+  color: var(--accent); transition: color 0.3s;
+  min-width: 56px; text-align: center;
+}
+.timer-display.urgent { color: var(--red); animation: pulse 0.5s ease infinite alternate; }
+@keyframes pulse { from { opacity: 1; } to { opacity: 0.4; } }
+
+.live-scores {
+  display: flex; gap: 10px; flex-wrap: wrap;
+}
+.score-pill {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 100px; padding: 5px 12px 5px 5px;
+  font-size: 12px; transition: border-color 0.2s;
+}
+.score-pill.answered { border-color: var(--green); }
+.score-pill .dot {
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700;
+}
+.score-pill .pts { font-family: var(--font-mono); color: var(--accent); font-size: 11px; }
+
+.game-body {
+  flex: 1; width: 100%; max-width: 860px;
+  margin: 0 auto; padding: 32px 24px;
+  display: flex; flex-direction: column; gap: 28px;
+}
+
+.bloque-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 3px; text-transform: uppercase;
+  color: var(--accent); 
+  border-left: 3px solid var(--accent); padding-left: 10px;
+}
+
+.question-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px; padding: 32px;
+  position: relative; overflow: hidden;
+}
+.question-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--accent3), var(--accent));
+}
+.question-num {
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--muted); letter-spacing: 2px; margin-bottom: 12px;
+}
+.question-text {
+  font-size: clamp(17px, 2.5vw, 21px);
+  font-weight: 700; line-height: 1.5;
+  color: var(--text);
+}
+.question-type-badge {
+  margin-top: 12px;
+  display: inline-block;
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 2px;
+  color: var(--accent2); text-transform: uppercase;
+  border: 1px solid var(--accent2); padding: 3px 8px; border-radius: 4px;
+}
+
+.options-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+@media (max-width: 580px) { .options-grid { grid-template-columns: 1fr; } }
+
+.option-btn {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 18px 20px;
+  color: var(--text); font-family: var(--font-display);
+  font-size: 14px; text-align: left; cursor: pointer;
+  transition: all 0.18s; position: relative;
+  display: flex; align-items: flex-start; gap: 14px;
+}
+.option-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: rgba(0,229,255,0.07);
+  transform: translateY(-2px);
+}
+.option-btn:disabled { cursor: not-allowed; }
+.option-btn.selected { border-color: var(--accent3); background: rgba(124,58,237,0.18); }
+.option-btn.correct  { border-color: var(--green);  background: rgba(0,255,136,0.12); }
+.option-btn.wrong    { border-color: var(--red);    background: rgba(255,59,92,0.12); }
+
+.opt-letter {
+  min-width: 28px; height: 28px; border-radius: 6px;
+  background: var(--border); display: flex; align-items: center;
+  justify-content: center; font-family: var(--font-mono);
+  font-size: 12px; font-weight: 700; color: var(--muted);
+  transition: all 0.18s;
+}
+.option-btn.selected .opt-letter { background: var(--accent3); color: white; }
+.option-btn.correct  .opt-letter { background: var(--green); color: var(--bg); }
+.option-btn.wrong    .opt-letter { background: var(--red); color: white; }
+
+/* V/F buttons */
+.vf-grid { display: flex; gap: 16px; }
+.vf-btn {
+  flex: 1; padding: 22px;
+  border-radius: 12px; border: 2px solid var(--border);
+  background: var(--surface2); color: var(--text);
+  font-family: var(--font-display); font-size: 18px; font-weight: 800;
+  cursor: pointer; transition: all 0.18s; text-align: center;
+}
+.vf-btn:hover:not(:disabled) { transform: translateY(-3px); }
+.vf-btn.v:hover:not(:disabled), .vf-btn.v.selected { border-color: var(--green); background: rgba(0,255,136,0.1); }
+.vf-btn.f:hover:not(:disabled), .vf-btn.f.selected { border-color: var(--red); background: rgba(255,59,92,0.1); }
+.vf-btn.correct { border-color: var(--green); background: rgba(0,255,136,0.2); }
+.vf-btn.wrong   { border-color: var(--red);   background: rgba(255,59,92,0.2); }
+
+/* Texto libre */
+.text-answer-wrap { display: flex; flex-direction: column; gap: 12px; }
+.text-answer {
+  width: 100%; padding: 16px;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 10px; color: var(--text);
+  font-family: var(--font-display); font-size: 15px; resize: vertical;
+  min-height: 90px; outline: none; transition: border-color 0.2s;
+}
+.text-answer:focus { border-color: var(--accent); }
+
+.btn-submit {
+  padding: 14px 32px; align-self: flex-end;
+  background: linear-gradient(135deg, var(--accent3), var(--accent));
+  border: none; border-radius: 8px;
+  color: white; font-family: var(--font-display);
+  font-size: 14px; font-weight: 700; cursor: pointer;
+  transition: transform 0.15s, opacity 0.15s;
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.btn-submit:hover { transform: translateY(-2px); }
+
+/* Escala */
+.scale-wrap { display: flex; flex-direction: column; gap: 16px; }
+.scale-opts  { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.scale-btn {
+  width: 52px; height: 52px; border-radius: 10px;
+  border: 2px solid var(--border); background: var(--surface2);
+  color: var(--text); font-family: var(--font-mono); font-size: 18px; font-weight: 700;
+  cursor: pointer; transition: all 0.18s; display: flex; align-items: center; justify-content: center;
+}
+.scale-btn:hover:not(:disabled), .scale-btn.selected {
+  border-color: var(--accent); background: rgba(0,229,255,0.12);
+  transform: scale(1.1);
+}
+.scale-labels { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+
+/* Feedback overlay */
+.feedback-overlay {
+  position: fixed; inset: 0; z-index: 100;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 12px;
+  pointer-events: none; opacity: 0;
+  transition: opacity 0.2s;
+}
+.feedback-overlay.show { opacity: 1; }
+.feedback-icon {
+  font-size: 90px; animation: bounceIn 0.4s cubic-bezier(.36,.07,.19,.97);
+}
+.feedback-text {
+  font-size: 28px; font-weight: 800;
+  animation: bounceIn 0.4s cubic-bezier(.36,.07,.19,.97) 0.05s both;
+}
+.feedback-pts {
+  font-family: var(--font-mono); font-size: 18px;
+  animation: bounceIn 0.4s cubic-bezier(.36,.07,.19,.97) 0.1s both;
+}
+@keyframes bounceIn {
+  0%   { transform: scale(0.3); opacity: 0; }
+  60%  { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Progress bar */
+.progress-bar-wrap {
+  height: 4px; background: var(--border);
+  position: sticky; top: 63px; z-index: 19;
+}
+.progress-bar {
+  height: 100%; background: linear-gradient(90deg, var(--accent3), var(--accent));
+  transition: width 0.5s ease; width: 0%;
+}
+
+/* ══════════════════ SCREEN: LEADERBOARD (intermedio) ══════════════════ */
+#screen-leaderboard { gap: 28px; }
+.lb-title {
+  font-size: 13px; letter-spacing: 4px; color: var(--muted);
+  font-family: var(--font-mono); text-transform: uppercase;
+}
+.lb-table {
+  width: 100%; max-width: 560px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; overflow: hidden;
+}
+.lb-row {
+  display: flex; align-items: center; padding: 16px 24px;
+  border-bottom: 1px solid var(--border); gap: 16px;
+  transition: background 0.2s;
+  animation: slideIn 0.3s ease both;
+}
+.lb-row:last-child { border-bottom: none; }
+@keyframes slideIn {
+  from { transform: translateX(-20px); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+.lb-rank {
+  min-width: 36px; height: 36px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono); font-size: 14px; font-weight: 700;
+}
+.lb-rank.r1 { background: var(--gold); color: var(--bg); }
+.lb-rank.r2 { background: var(--silver); color: var(--bg); }
+.lb-rank.r3 { background: var(--bronze); color: var(--bg); }
+.lb-rank.rn { background: var(--surface2); color: var(--muted); }
+.lb-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 700; min-width: 36px;
+}
+.lb-name { flex: 1; font-size: 15px; font-weight: 700; }
+.lb-correct { font-family: var(--font-mono); font-size: 12px; color: var(--muted); margin-right: 8px; }
+.lb-score {
+  font-family: var(--font-mono); font-size: 18px; font-weight: 700;
+  color: var(--accent);
+}
+.lb-delta { font-family: var(--font-mono); font-size: 12px; color: var(--green); min-width: 40px; text-align: right; }
+
+.btn-next-block {
+  padding: 16px 48px;
+  background: linear-gradient(135deg, var(--accent2), var(--gold));
+  border: none; border-radius: 8px;
+  color: var(--bg); font-family: var(--font-display);
+  font-size: 16px; font-weight: 800; letter-spacing: 2px;
+  cursor: pointer; text-transform: uppercase;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.btn-next-block:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 40px rgba(255,215,0,0.3);
+}
+
+/* ══════════════════ SCREEN: PODIUM ══════════════════ */
+#screen-podium {
+  gap: 24px;
+  background: radial-gradient(ellipse at center, rgba(124,58,237,0.15) 0%, transparent 70%);
+}
+.podium-title {
+  text-align: center;
+}
+.podium-title .sup {
+  font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 4px; color: var(--muted); text-transform: uppercase;
+  display: block; margin-bottom: 8px;
+}
+.podium-title h1 {
+  font-size: clamp(36px, 6vw, 64px); font-weight: 800;
+  background: linear-gradient(135deg, var(--gold), var(--accent2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.podium-stage {
+  display: flex; align-items: flex-end; justify-content: center;
+  gap: 12px; width: 100%; max-width: 580px;
+}
+
+.podium-slot {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 14px;
+  animation: podiumRise 0.8s cubic-bezier(.34,1.56,.64,1) both;
+}
+.podium-slot:nth-child(1) { animation-delay: 0.4s; }
+.podium-slot:nth-child(2) { animation-delay: 0.1s; }
+.podium-slot:nth-child(3) { animation-delay: 0.7s; }
+
+@keyframes podiumRise {
+  from { transform: translateY(60px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.podium-player {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+.podium-crown { font-size: 28px; animation: float 2s ease-in-out infinite; }
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-6px); }
+}
+.podium-avatar {
+  width: 60px; height: 60px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; font-weight: 800;
+  border: 3px solid transparent;
+}
+.podium-slot.p1 .podium-avatar { border-color: var(--gold); box-shadow: 0 0 20px rgba(255,215,0,0.5); }
+.podium-slot.p2 .podium-avatar { border-color: var(--silver); box-shadow: 0 0 20px rgba(192,192,192,0.4); }
+.podium-slot.p3 .podium-avatar { border-color: var(--bronze); box-shadow: 0 0 20px rgba(205,127,50,0.4); }
+.podium-pname { font-size: 14px; font-weight: 700; text-align: center; }
+.podium-pscore { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+
+.podium-bar {
+  width: 100%; border-radius: 10px 10px 0 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono); font-size: 28px; font-weight: 700;
+  padding: 12px 0;
+}
+.podium-slot.p1 .podium-bar { background: linear-gradient(180deg, #ffd700, #b8860b); height: 100px; color: var(--bg); }
+.podium-slot.p2 .podium-bar { background: linear-gradient(180deg, #c0c0c0, #808080); height: 72px;  color: var(--bg); }
+.podium-slot.p3 .podium-bar { background: linear-gradient(180deg, #cd7f32, #8b4513); height: 52px;  color: white; }
+
+.full-results {
+  width: 100%; max-width: 560px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; overflow: hidden;
+}
+.full-results-header {
+  padding: 16px 24px; border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--muted); letter-spacing: 3px; text-transform: uppercase;
+}
+
+.confetti-container {
+  position: fixed; inset: 0; pointer-events: none; z-index: 200; overflow: hidden;
+}
+.confetti-piece {
+  position: absolute; width: 10px; height: 10px; top: -20px;
+  animation: confettiFall linear forwards;
+  border-radius: 2px;
+}
+@keyframes confettiFall {
+  to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+
+.btn-restart {
+  padding: 14px 40px; margin-top: 8px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--muted);
+  font-family: var(--font-display); font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px;
+}
+.btn-restart:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Particles */
+.particle {
+  position: fixed; pointer-events: none; z-index: 1;
+  width: 3px; height: 3px; border-radius: 50%; background: var(--accent);
+  opacity: 0; animation: particleDrift 6s ease-in-out infinite;
+}
+@keyframes particleDrift {
+  0%   { transform: translate(0, 0) scale(1); opacity: 0; }
+  20%  { opacity: 0.6; }
+  100% { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; }
+}
+
+/* Correct/Wrong flash */
+.flash-correct { animation: flashGreen 0.5s ease; }
+.flash-wrong   { animation: flashRed   0.5s ease; }
+@keyframes flashGreen {
+  0%,100% { background: var(--bg); }
+  50%     { background: rgba(0,255,136,0.08); }
+}
+@keyframes flashWrong {
+  0%,100% { background: var(--bg); }
+  50%     { background: rgba(255,59,92,0.08); }
+}
+</style>
+</head>
+<body>
+
+<!-- Particles background -->
+<div id="particles"></div>
+
+<!-- ══════════════ SCREEN: LOBBY ══════════════ -->
+<div id="screen-lobby" class="screen active">
+  <div class="logo-badge">
+    <span class="tag">USB · Ingeniería de Datos y Software</span>
+    <h1 class="logo-title">DATA<br>QUIZ</h1>
+    <p class="logo-sub">Gestión de Metadatos & Calidad de los Datos<br>Competencia en tiempo real · 100 preguntas · 6 bloques</p>
+  </div>
+
+  <div class="lobby-card">
+    <h2>Registrar jugador</h2>
+    <div class="input-group">
+      <label>Nombre completo</label>
+      <input type="text" id="player-name" placeholder="Ej: María García" maxlength="30">
+    </div>
+    <div class="input-group">
+      <label>Avatar</label>
+      <select id="player-avatar">
+        <option value="🦁">🦁 León</option>
+        <option value="🐯">🐯 Tigre</option>
+        <option value="🦊">🦊 Zorro</option>
+        <option value="🐺">🐺 Lobo</option>
+        <option value="🦅">🦅 Águila</option>
+        <option value="🐉">🐉 Dragón</option>
+        <option value="🦋">🦋 Mariposa</option>
+        <option value="🐬">🐬 Delfín</option>
+        <option value="🦁">🧠 Mente</option>
+        <option value="⚡">⚡ Rayo</option>
+        <option value="🔥">🔥 Fuego</option>
+        <option value="🌊">🌊 Ola</option>
+      </select>
+    </div>
+    <button class="btn-primary" onclick="registerPlayer()">Unirse al juego</button>
+  </div>
+
+  <div class="players-waiting" id="players-waiting-card" style="display:none">
+    <h3>Jugadores en sala (<span id="player-count">0</span>)</h3>
+    <div id="players-list"></div>
+  </div>
+
+  <button class="btn-start" id="btn-start" onclick="startGame()">
+    🚀 Iniciar competencia
+  </button>
+
+  <div style="font-family:var(--font-mono);font-size:11px;color:var(--muted);text-align:center;line-height:2">
+    Mínimo 1 jugador para iniciar · Puedes jugar en solitario o en grupo<br>
+    El docente hace clic en "Iniciar competencia" cuando todos estén listos
+  </div>
+</div>
+
+<!-- ══════════════ SCREEN: GAME ══════════════ -->
+<div id="screen-game" class="screen">
+  <div class="game-header">
+    <div class="game-header-left">
+      <div class="q-counter">Pregunta <span id="q-current">1</span> / <span id="q-total">100</span></div>
+      <div id="bloque-indicator" class="bloque-badge">Bloque 1</div>
+    </div>
+    <div class="timer-wrap">
+      <span class="timer-label">TIEMPO</span>
+      <div class="timer-display" id="timer-display">20</div>
+    </div>
+    <div class="live-scores" id="live-scores"></div>
+  </div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-bar" id="progress-bar"></div>
+  </div>
+
+  <div class="game-body">
+    <div class="question-card" id="question-card">
+      <div class="question-num" id="question-num">PREGUNTA 1</div>
+      <div class="question-text" id="question-text"></div>
+      <div class="question-type-badge" id="question-type-badge"></div>
+    </div>
+    <div id="answer-area"></div>
+  </div>
+</div>
+
+<!-- ══════════════ SCREEN: LEADERBOARD (entre bloques) ══════════════ -->
+<div id="screen-leaderboard" class="screen">
+  <div class="lb-title" id="lb-subtitle">Resultados · Bloque 1</div>
+  <div style="font-size:clamp(28px,5vw,46px);font-weight:800;text-align:center;" id="lb-heading">🏁 Fin del Bloque</div>
+  <div class="lb-table" id="lb-table"></div>
+  <button class="btn-next-block" id="btn-next-block" onclick="continueGame()">
+    Siguiente bloque →
+  </button>
+</div>
+
+<!-- ══════════════ SCREEN: PODIUM FINAL ══════════════ -->
+<div id="screen-podium" class="screen">
+  <div class="podium-title">
+    <span class="sup">🎓 Resultado Final · DataQuiz</span>
+    <h1>¡Campeones!</h1>
+  </div>
+
+  <div class="podium-stage" id="podium-stage"></div>
+
+  <div class="full-results" id="full-results">
+    <div class="full-results-header">Tabla completa de resultados</div>
+    <div id="full-results-body"></div>
+  </div>
+
+  <button class="btn-restart" onclick="restartGame()">↺ Nueva partida</button>
+</div>
+
+<!-- Feedback overlay -->
+<div class="feedback-overlay" id="feedback-overlay">
+  <div class="feedback-icon" id="feedback-icon"></div>
+  <div class="feedback-text" id="feedback-text"></div>
+  <div class="feedback-pts"  id="feedback-pts"></div>
+</div>
+
+<!-- Confetti -->
+<div class="confetti-container" id="confetti-container"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   BANCO DE PREGUNTAS — 100 preguntas, 6 bloques
+   Tipos: MC=selección única, VF=verdadero/falso,
+          CB=casillas, TX=texto corto, PA=párrafo, SC=escala
+═══════════════════════════════════════════════════════════════ */
+const BLOQUES = [
+  { nombre: 'Bloque 1 · Metadatos', inicio: 0, fin: 18 },
+  { nombre: 'Bloque 2 · Calidad de Datos', inicio: 18, fin: 36 },
+  { nombre: 'Bloque 3 · Ciclo de Vida', inicio: 36, fin: 50 },
+  { nombre: 'Bloque 4 · Power BI', inicio: 50, fin: 66 },
+  { nombre: 'Bloque 5 · Microsoft Fabric', inicio: 66, fin: 82 },
+  { nombre: 'Bloque 6 · Python', inicio: 82, fin: 100 },
+];
+
+const PREGUNTAS = [
+  // ─── BLOQUE 1: Metadatos ───
+  { t:'MC', b:1, q:'¿Cuál es la definición más precisa de metadato?',
+    ops:['Un archivo que almacena grandes volúmenes de datos','Dato que describe, contextualiza o proporciona información sobre otros datos','Un tipo de base de datos NoSQL','Un lenguaje de consulta para bases de datos relacionales'], ans:1, pts:10 },
+  { t:'VF', b:1, q:'Los metadatos descriptivos incluyen información sobre el formato, tamaño y estructura de un archivo.',
+    ops:['Verdadero','Falso'], ans:1, pts:10 },
+  { t:'MC', b:1, q:'¿Cuál de los siguientes es un ejemplo de metadato estructural?',
+    ops:['El título de un documento Word','La relación entre capítulos y secciones dentro de un libro digital','La fecha de creación de una fotografía','El nombre del autor de un artículo científico'], ans:1, pts:10 },
+  { t:'CB', b:1, q:'¿Cuáles de los siguientes son tipos de metadatos reconocidos en la literatura? (Múltiple)',
+    ops:['Metadatos descriptivos','Metadatos estructurales','Metadatos de gestión/administrativos','Metadatos sintácticos','Metadatos de preservación'], ans:[0,1,2,4], pts:10 },
+  { t:'MC', b:1, q:'¿Qué estándar de metadatos es ampliamente utilizado en bibliotecas digitales?',
+    ops:['JSON-LD','Dublin Core','OpenAPI','ISO 8583'], ans:1, pts:10 },
+  { t:'VF', b:1, q:'El esquema XMP de Adobe es un estándar para incrustar metadatos dentro de archivos como PDF, JPEG o PNG.',
+    ops:['Verdadero','Falso'], ans:0, pts:10 },
+  { t:'MC', b:1, q:'En bases de datos, ¿dónde se almacenan los metadatos del sistema?',
+    ops:['En tablas de usuario','En el catálogo del sistema o diccionario de datos','En archivos de log de transacciones','En índices de texto completo'], ans:1, pts:10 },
+  { t:'TX', b:1, q:'Escribe el nombre del proceso donde los metadatos se capturan automáticamente por el sistema, sin intervención manual.',
+    ans:'captura automática de metadatos', pts:10 },
+  { t:'CB', b:1, q:'¿Cuáles son herramientas de catálogo o repositorio de metadatos empresariales? (Múltiple)',
+    ops:['Apache Atlas','Microsoft Purview','Jupyter Notebook','Alation','Pandas'], ans:[0,1,3], pts:10 },
+  { t:'MC', b:1, q:'¿Qué es un "catálogo de datos" en la gestión de metadatos empresariales?',
+    ops:['Un archivo Excel con lista de tablas','Herramienta centralizada que descubre, indexa y documenta activos de datos','Un tipo de base de datos NoSQL','Una capa de seguridad para encriptar metadatos'], ans:1, pts:10 },
+  { t:'VF', b:1, q:'Los metadatos de provenance registran el origen e historia de transformaciones aplicadas a un conjunto de datos.',
+    ops:['Verdadero','Falso'], ans:0, pts:10 },
+  { t:'MC', b:1, q:'¿Qué es el "linaje de datos" (data lineage)?',
+    ops:['El número de versiones de un dataset','Registro del recorrido de los datos desde su origen hasta su destino con todas las transformaciones','Lista de usuarios que accedieron a un archivo','El esquema relacional de una base de datos'], ans:1, pts:10 },
+  { t:'SC', b:1, q:'¿Qué tan importante es la gestión de metadatos para la gobernanza de datos? (1=poco, 5=fundamental)',
+    min:1, max:5, pts:5 },
+  { t:'MC', b:1, q:'¿Cuál elemento es parte esencial de un diccionario de datos?',
+    ops:['El código fuente de la aplicación','Nombre, tipo, longitud, descripción y restricciones de cada campo','Registros históricos de consultas SQL','Archivos de backup de la base de datos'], ans:1, pts:10 },
+  { t:'TX', b:1, q:'Nombra el estándar ISO que define principios y vocabulario de gestión de metadatos para recursos de información.',
+    ans:'ISO 15836', pts:10 },
+  { t:'MC', b:1, q:'¿Cuál es la diferencia entre un esquema de metadatos y un perfil de aplicación?',
+    ops:['No existe diferencia','Un esquema define elementos disponibles; un perfil adapta elementos de uno o más esquemas para un contexto específico','El perfil solo aplica a metadatos audiovisuales','El esquema es exclusivo de bases de datos relacionales'], ans:1, pts:10 },
+  { t:'CB', b:1, q:'¿Cuáles son beneficios de una gestión adecuada de metadatos? (Múltiple)',
+    ops:['Mejora búsqueda y descubrimiento de datos','Facilita cumplimiento regulatorio (GDPR, CCPA)','Elimina necesidad de copias de seguridad','Apoya trazabilidad y auditoría','Reduce tiempo de integración de nuevas fuentes'], ans:[0,1,3,4], pts:10 },
+  { t:'PA', b:1, q:'Describe la diferencia entre metadatos técnicos y metadatos de negocio. Da un ejemplo de cada uno en un sistema de ventas.',
+    pts:10 },
+
+  // ─── BLOQUE 2: Calidad de Datos ───
+  { t:'MC', b:2, q:'¿Cuáles son las dimensiones de calidad de datos de la norma ISO/IEC 25012?',
+    ops:['Velocidad, Volumen y Variedad','Exactitud, Completitud, Consistencia, Credibilidad, Actualidad, entre otras','Disponibilidad, Integridad y Confidencialidad','Normalización, Desnormalización e Indexación'], ans:1, pts:10 },
+  { t:'VF', b:2, q:'La "completitud" se refiere a que los datos estén libres de errores y reflejen con precisión la realidad.',
+    ops:['Verdadero','Falso'], ans:1, pts:10 },
+  { t:'MC', b:2, q:'¿Qué dimensión evalúa si los valores están dentro de rangos o dominios válidos?',
+    ops:['Completitud','Consistencia','Validez (Conformidad)','Unicidad'], ans:2, pts:10 },
+  { t:'CB', b:2, q:'¿Cuáles son causas comunes de baja calidad de datos? (Múltiple)',
+    ops:['Entrada manual con errores tipográficos','Integración de múltiples fuentes con formatos inconsistentes','Uso de índices en bases de datos relacionales','Migración de sistemas legacy sin validación','Falta de estándares en nomenclatura'], ans:[0,1,3,4], pts:10 },
+  { t:'MC', b:2, q:'¿Qué técnica se usa para identificar y corregir registros duplicados?',
+    ops:['Normalización de tablas','Deduplicación o resolución de entidades','Particionamiento horizontal','Indexación full-text'], ans:1, pts:10 },
+  { t:'VF', b:2, q:'La "consistencia" implica que un mismo dato no tenga representaciones contradictorias en diferentes sistemas.',
+    ops:['Verdadero','Falso'], ans:0, pts:10 },
+  { t:'MC', b:2, q:'¿Cuál es un enfoque metodológico para gestionar la calidad de datos de forma continua?',
+    ops:['SCRUM aplicado a bases de datos','Total Data Quality Management (TDQM)','ITIL para gestión de servicios TI','PMBOK para gestión de proyectos'], ans:1, pts:10 },
+  { t:'TX', b:2, q:'Escribe el nombre de la norma ISO que establece el modelo de calidad para datos almacenados en sistemas de información.',
+    ans:'ISO/IEC 25012', pts:10 },
+  { t:'CB', b:2, q:'¿Cuáles son actividades propias del perfilado de datos (data profiling)? (Múltiple)',
+    ops:['Análisis de valores nulos y missings','Detección de outliers estadísticos','Creación de modelos de machine learning','Revisión de distribución de valores por columna','Identificación de relaciones entre columnas (cardinalidad)'], ans:[0,1,3,4], pts:10 },
+  { t:'MC', b:2, q:'En gobernanza de datos, ¿quién es el "Data Owner"?',
+    ops:['El DBA que administra técnicamente la BD','El desarrollador que creó la tabla','El responsable de negocio que define reglas y uso del dato','El analista que consume los datos'], ans:2, pts:10 },
+  { t:'VF', b:2, q:'Los datos faltantes (missing values) siempre deben eliminarse para garantizar la calidad del análisis.',
+    ops:['Verdadero','Falso'], ans:1, pts:10 },
+  { t:'MC', b:2, q:'¿Qué es una "regla de negocio" en validación de calidad de datos?',
+    ops:['Una cláusula SQL CHECK CONSTRAINT','Criterio definido por el negocio que los datos deben cumplir para ser correctos y útiles','Un tipo de índice en bases de datos NoSQL','Una función de agregación en DAX'], ans:1, pts:10 },
+  { t:'SC', b:2, q:'¿Qué tan crítico es el impacto de la mala calidad de datos en la toma de decisiones? (1=nulo, 5=crítico)',
+    min:1, max:5, pts:5 },
+  { t:'CB', b:2, q:'¿Cuáles técnicas se usan para tratar valores faltantes? (Múltiple)',
+    ops:['Imputación por media o mediana','Eliminación del registro completo (listwise deletion)','Duplicación de todos los registros existentes','Imputación por modelo predictivo (KNN)','Uso de un valor centinela o indicador de ausencia'], ans:[0,1,3,4], pts:10 },
+  { t:'MC', b:2, q:'¿Qué significa GIGO en calidad de datos?',
+    ops:['Global Information Governance and Operations','Garbage In, Garbage Out','Generate, Integrate, Govern, Operate','Grid Input / Grid Output'], ans:1, pts:10 },
+  { t:'VF', b:2, q:'La "temporalidad" (timeliness) evalúa si los datos están disponibles cuando se necesitan y reflejan la realidad en el momento adecuado.',
+    ops:['Verdadero','Falso'], ans:0, pts:10 },
+  { t:'MC', b:2, q:'¿Cuál es el objetivo de la "reconciliación de datos" entre sistemas?',
+    ops:['Crear backups automáticos','Verificar que los mismos datos en sistemas distintos sean coherentes y coincidan','Optimizar consultas SQL','Migrar datos a la nube'], ans:1, pts:10 },
+  { t:'PA', b:2, q:'Explica la diferencia entre "exactitud" y "precisión" en calidad de datos con ejemplos del dominio de ventas.',
+    pts:10 },
+
+  // ─── BLOQUE 3: Ciclo de Vida ───
+  { t:'MC', b:3, q:'¿Cuál es la fase inicial del ciclo de vida del análisis de datos?',
+    ops:['Modelado y entrenamiento','Definición del problema y recolección de requerimientos','Visualización y presentación','Despliegue en producción'], ans:1, pts:10 },
+  { t:'VF', b:3, q:'La fase de preparación de datos (data wrangling) es generalmente la más rápida del ciclo analítico.',
+    ops:['Verdadero','Falso'], ans:1, pts:10 },
+  { t:'MC', b:3, q:'¿Qué tipo de análisis responde a "¿por qué ocurrió esto?"?',
+    ops:['Análisis descriptivo','Análisis diagnóstico','Análisis predictivo','Análisis prescriptivo'], ans:1, pts:10 },
+  { t:'CB', b:3, q:'¿Cuáles son tipos de análisis de datos según su finalidad? (Múltiple)',
+    ops:['Descriptivo','Diagnóstico','Predictivo','Prescriptivo','Normativo'], ans:[0,1,2,3], pts:10 },
+  { t:'MC', b:3, q:'¿Cuál es el propósito de la "validación del modelo" en el ciclo analítico?',
+    ops:['Recopilar más datos históricos','Verificar que el modelo cumple criterios de desempeño antes del despliegue','Diseñar el dashboard final','Definir los KPI del negocio'], ans:1, pts:10 },
+  { t:'VF', b:3, q:'Un Data Lakehouse combina la flexibilidad de un Data Lake con las capacidades analíticas de un Data Warehouse.',
+    ops:['Verdadero','Falso'], ans:0, pts:10 },
+  { t:'MC', b:3, q:'¿Cuál NO es una característica de un Data Warehouse tradicional?',
+    ops:['Orientado a temas del negocio','Integrado desde múltiples fuentes','Almacena datos en formato crudo sin esquema previo (schema-on-read)','No volátil (datos históricos no se modifican)'], ans:2, pts:10 },
+  { t:'TX', b:3, q:'Escribe el nombre del proceso que extrae datos de múltiples fuentes, los transforma y los carga en un destino analítico.',
+    ans:'ETL', pts:10 },
+  { t:'MC', b:3, q:'¿Qué rol tiene el "Data Engineer" en el ciclo de vida analítico?',
+    ops:['Define estrategia de negocios basada en datos','Construye y mantiene pipelines de datos, infraestructura y almacenes','Crea visualizaciones BI para usuarios finales','Desarrolla únicamente modelos de machine learning'], ans:1, pts:10 },
+  { t:'CB', b:3, q:'¿Cuáles son componentes de una arquitectura de datos moderna? (Múltiple)',
+    ops:['Data Lake','Data Warehouse','Pipeline de ingesta (ETL/ELT)','Sistema de control de versiones de código','Capa de visualización (BI)'], ans:[0,1,2,4], pts:10 },
+  { t:'MC', b:3, q:'¿Cuál es la diferencia entre ETL y ELT?',
+    ops:['Son procesos idénticos','En ETL la transformación ocurre antes de cargar; en ELT se carga primero y se transforma en el destino','ETL es solo para NoSQL; ELT solo para relacionales','ELT es manual; ETL es automatizado'], ans:1, pts:10 },
+  { t:'VF', b:3, q:'La fase de monitoreo y mantenimiento es opcional cuando el modelo tiene alta precisión inicial.',
+    ops:['Verdadero','Falso'], ans:1, pts:10 },
+  { t:'MC', b:3, q:'¿Qué métrica se usa para evaluar la latencia en pipelines de datos en tiempo real?',
+    ops:['Throughput en MB/s','SLA de latencia en milisegundos o segundos','Número de tablas en el DW','Cantidad de dashboards publicados'], ans:1, pts:10 },
+  { t:'PA', b:3, q:'Describe las fases del ciclo de vida del análisis de datos y cómo la calidad de los metadatos impacta cada una.',
+    pts:10 },
+
+  // ─── BLOQUE 4: Power BI ───
+  { t:'MC', b:4, q:'¿Qué componente de Power BI se usa para limpiar y transformar datos?',
+    ops:['Power BI Service','Power Query Editor','DAX Formula Bar','Power BI Report Server'], ans:1, pts:10 },
+  { t:'VF', b:4, q:'En Power BI, una medida (measure) DAX se almacena físicamente como columna adicional en el modelo.',
+    ops:['Verdadero','Falso'], ans:1, pts:10 },
+  { t:'MC', b:4, q:'¿Qué hace la función DAX CALCULATE()?',
+    ops:['Suma condicional de filas en una tabla','Evalúa una expresión en un contexto de filtro modificado','Crea una tabla calculada nueva','Convierte tipos de datos de texto a número'], ans:1, pts:10 },
+  { t:'CB', b:4, q:'¿Cuáles son funciones DAX de inteligencia de tiempo? (Múltiple)',
+    ops:['TOTALYTD','SAMEPERIODLASTYEAR','DATEADD','SUMX','PARALLELPERIOD'], ans:[0,1,2,4], pts:10 },
+  { t:'MC', b:4, q:'¿Cuál modo de conectividad en Power BI consulta la fuente en tiempo real sin importar datos?',
+    ops:['Import Mode','DirectQuery','Live Connection','Push Dataset'], ans:1, pts:10 },
+  { t:'VF', b:4, q:'Power BI Service permite publicar informes y compartirlos a través de workspaces colaborativos.',
+    ops:['Verdadero','Falso'], ans:0, pts:10 },
+  { t:'MC', b:4, q:'¿Qué es un "gateway de datos" en Power BI?',
+    ops:['Un tipo de visual personalizado de AppSource','Puente que conecta Power BI Service con fuentes locales (on-premises)','Función de seguridad para cifrar informes','Conector nativo para bases NoSQL'], ans:1, pts:10 },
+  { t:'TX', b:4, q:'Escribe el nombre del lenguaje de fórmulas que usa Power Query Editor (diferente a DAX).',
+    ans:'M', pts:10 },
+  { t:'CB', b:4, q:'¿Cuáles son buenas prácticas en el modelado de datos en Power BI? (Múltiple)',
+    ops:['Usar un esquema estrella (star schema)','Evitar columnas calculadas innecesarias','Usar relaciones bidireccionales en todos los casos','Separar tablas de hechos de tablas de dimensiones','Desactivar carga de tablas intermedias no usadas en visuals'], ans:[0,1,3,4], pts:10 },
+  { t:'MC', b:4, q:'¿Qué es la "seguridad a nivel de fila" (Row Level Security, RLS) en Power BI?',
+    ops:['Cifrado para exportar a PDF','Mecanismo que restringe acceso a datos según el rol del usuario','Función DAX para filtrar filas vacías','Característica exclusiva de Power BI Premium'], ans:1, pts:10 },
+  { t:'VF', b:4, q:'Los dashboards en Power BI Service pueden consolidar visuals de múltiples informes distintos.',
+    ops:['Verdadero','Falso'], ans:0, pts:10 },
+  { t:'MC', b:4, q:'¿Cuál función DAX devuelve ventas del mismo período del año anterior?',
+    ops:['TOTALYTD','PREVIOUSYEAR','SAMEPERIODLASTYEAR','DATESINPERIOD'], ans:2, pts:10 },
+  { t:'CB', b:4, q:'¿Cuáles son tipos de licencia de Power BI disponibles? (Múltiple)',
+    ops:['Power BI Free','Power BI Pro','Power BI Premium','Power BI Enterprise (perpetua)','Power BI Embedded'], ans:[0,1,2,4], pts:10 },
+  { t:'MC', b:4, q:'¿Qué permite la "actualización incremental" en Power BI?',
+    ops:['Actualizar solo el diseño visual','Refrescar únicamente datos nuevos o modificados sin recargar todo el dataset','Publicar automáticamente a todos los usuarios','Crear copias incrementales del archivo PBIX'], ans:1, pts:10 },
+  { t:'TX', b:4, q:'Menciona el nombre del formato nativo de archivo de Power BI Desktop.',
+    ans:'PBIX', pts:10 },
+  { t:'PA', b:4, q:'Explica la diferencia entre medida (measure) y columna calculada en DAX, indicando cuándo es preferible cada una.',
+    pts:10 },
+
+  // ─── BLOQUE 5: Microsoft Fabric ───
+  { t:'MC', b:5, q:'¿Qué es Microsoft Fabric?',
+    ops:['Sistema operativo para servidores en la nube','Plataforma unificada SaaS de análisis de datos end-to-end que integra ingeniería de datos, ciencia de datos, BI y más','Reemplazo de SQL Server Management Studio','Sistema de virtualización de escritorios Microsoft'], ans:1, pts:10 },
+  { t:'VF', b:5, q:'OneLake en Microsoft Fabric es el almacenamiento centralizado y unificado, similar a un OneDrive para datos.',
+    ops:['Verdadero','Falso'], ans:0, pts:10 },
+  { t:'MC', b:5, q:'¿Qué formato de archivo abierto usa OneLake por defecto en Microsoft Fabric?',
+    ops:['CSV comprimido en GZIP','Parquet sobre Delta Lake','XML con esquema XSD','AVRO con compresión Snappy'], ans:1, pts:10 },
+  { t:'CB', b:5, q:'¿Cuáles son experiencias (workloads) disponibles en Microsoft Fabric? (Múltiple)',
+    ops:['Data Engineering (Synapse)','Data Science','Real-Time Analytics','Azure DevOps','Power BI'], ans:[0,1,2,4], pts:10 },
+  { t:'MC', b:5, q:'¿Cuál es la diferencia principal entre Lakehouse y Fabric Warehouse en Microsoft Fabric?',
+    ops:['Son equivalentes; solo difieren en el nombre','El Lakehouse combina Delta Lake con SQL; el Fabric Warehouse es un almacén T-SQL transaccional con soporte ACID completo','El Fabric Warehouse no soporta SQL','El Lakehouse solo admite datos en tiempo real'], ans:1, pts:10 },
+  { t:'VF', b:5, q:'Los Shortcuts de OneLake permiten acceder a datos en Azure Data Lake Storage, AWS S3 o GCS sin copiarlos físicamente.',
+    ops:['Verdadero','Falso'], ans:0, pts:10 },
+  { t:'MC', b:5, q:'¿Qué lenguaje se usa principalmente en los notebooks de Synapse Data Engineering en Fabric?',
+    ops:['R y Julia','PySpark y Spark SQL','PHP y Node.js','DAX y M'], ans:1, pts:10 },
+  { t:'TX', b:5, q:'Escribe el nombre del lenguaje de consulta usado en Real-Time Analytics (KQL Database) dentro de Microsoft Fabric.',
+    ans:'KQL', pts:10 },
+  { t:'CB', b:5, q:'¿Cuáles son beneficios de Microsoft Fabric frente a arquitecturas de datos con múltiples herramientas independientes? (Múltiple)',
+    ops:['Gobernanza y seguridad centralizada con Microsoft Purview','Reducción del movimiento de datos gracias a OneLake','Requiere más personal especializado','Experiencia de usuario unificada en un único entorno','Facturación unificada por unidades de capacidad (F-SKU)'], ans:[0,1,3,4], pts:10 },
+  { t:'MC', b:5, q:'¿Qué es un "pipeline" en Data Factory de Microsoft Fabric?',
+    ops:['Tipo de gráfico de flujo en Power BI','Flujo de trabajo orquestado que mueve y transforma datos entre orígenes y destinos','Archivo de configuración de Spark','Tipo de workspace compartido entre equipos'], ans:1, pts:10 },
+  { t:'VF', b:5, q:'Microsoft Fabric se basa en un modelo de precios por capacidad denominado "F-SKU".',
+    ops:['Verdadero','Falso'], ans:0, pts:10 },
+  { t:'MC', b:5, q:'¿Cómo se integra Microsoft Purview con Microsoft Fabric?',
+    ops:['No existe integración','Purview actúa como capa de gobernanza y catálogo de metadatos para activos de Fabric','Purview reemplaza completamente a OneLake','Purview solo se integra con Azure SQL Database'], ans:1, pts:10 },
+  { t:'CB', b:5, q:'¿Cuáles artefactos pueden existir dentro de un Lakehouse en Microsoft Fabric? (Múltiple)',
+    ops:['Tablas Delta (Delta tables)','Archivos Parquet o CSV en la sección Files','Notebooks de PySpark','Informes Power BI incrustados directamente','Pipelines de Data Factory'], ans:[0,1], pts:10 },
+  { t:'MC', b:5, q:'¿Qué es el "SQL Analytics Endpoint" de un Lakehouse en Fabric?',
+    ops:['Una API REST para consultas externas','Punto de conexión T-SQL de solo lectura generado automáticamente sobre tablas Delta del Lakehouse','Tipo de gateway on-premises para Fabric','Instancia dedicada de Azure SQL Managed Instance'], ans:1, pts:10 },
+  { t:'SC', b:5, q:'¿Qué tan preparada está una organización sin estrategia de datos unificada para adoptar Microsoft Fabric? (1=nada, 5=completamente)',
+    min:1, max:5, pts:5 },
+  { t:'PA', b:5, q:'Explica el concepto de OneLake en Microsoft Fabric y cómo los Shortcuts contribuyen a una arquitectura sin silos.',
+    pts:10 },
+
+  // ─── BLOQUE 6: Python ───
+  { t:'MC', b:6, q:'¿Cuál es la librería de Python más usada para manipulación y análisis de datos tabulares?',
+    ops:['NumPy','Pandas','Matplotlib','Scikit-learn'], ans:1, pts:10 },
+  { t:'VF', b:6, q:'En Pandas, un DataFrame es una estructura bidimensional con filas y columnas etiquetadas, similar a una tabla de base de datos.',
+    ops:['Verdadero','Falso'], ans:0, pts:10 },
+  { t:'MC', b:6, q:'¿Qué método de Pandas lee un archivo CSV y lo carga en un DataFrame?',
+    ops:['pd.load_csv()','pd.read_csv()','pd.import_csv()','pd.open_csv()'], ans:1, pts:10 },
+  { t:'CB', b:6, q:'¿Cuáles métodos de Pandas son útiles para el perfilado inicial de un DataFrame? (Múltiple)',
+    ops:['df.head()','df.describe()','df.info()','df.merge()','df.isnull().sum()'], ans:[0,1,2,4], pts:10 },
+  { t:'MC', b:6, q:'¿Qué función de Pandas combina dos DataFrames por columna clave, similar a un JOIN en SQL?',
+    ops:['pd.concat()','pd.merge()','df.append()','df.join() con how="cross"'], ans:1, pts:10 },
+  { t:'TX', b:6, q:'Escribe el nombre del método de Pandas que elimina filas con valores nulos (NaN) de un DataFrame.',
+    ans:'dropna', pts:10 },
+  { t:'VF', b:6, q:'Matplotlib es suficiente por sí sola para crear violin plots o heatmaps de correlación sin librerías adicionales.',
+    ops:['Verdadero','Falso'], ans:1, pts:10 },
+  { t:'MC', b:6, q:'¿Cuál librería de Python es especializada en visualización estadística de alto nivel basada en Matplotlib?',
+    ops:['Plotly','Seaborn','Bokeh','Altair'], ans:1, pts:10 },
+  { t:'CB', b:6, q:'¿Cuáles librerías de Python se usan para conectarse a bases de datos relacionales? (Múltiple)',
+    ops:['SQLAlchemy','pyodbc','psycopg2','BeautifulSoup','cx_Oracle'], ans:[0,1,2,4], pts:10 },
+  { t:'MC', b:6, q:'¿Qué librería de Python se usa para leer y escribir archivos Excel (.xlsx)?',
+    ops:['csv','openpyxl o xlrd','json','pickle'], ans:1, pts:10 },
+  { t:'VF', b:6, q:'En Pandas, groupby() permite agrupar filas por columnas y aplicar funciones de agregación sobre los grupos.',
+    ops:['Verdadero','Falso'], ans:0, pts:10 },
+  { t:'MC', b:6, q:'¿Qué librería de Python se usa para conectarse a Microsoft Fabric mediante T-SQL?',
+    ops:['pymssql o pyodbc con el endpoint SQL de Fabric','requests + JSON exclusivamente','sqlite3','pandas_profiling'], ans:0, pts:10 },
+  { t:'CB', b:6, q:'¿Cuáles son buenas prácticas al escribir scripts Python para pipelines de calidad de datos? (Múltiple)',
+    ops:['Documentar funciones con docstrings','Implementar manejo de excepciones (try/except)','Evitar funciones y reutilizar código con copy-paste','Registrar logs de ejecución y errores','Usar variables de entorno para credenciales'], ans:[0,1,3,4], pts:10 },
+  { t:'MC', b:6, q:'¿Qué hace el código Pandas: df[df["ventas"] > 1000]?',
+    ops:['Elimina filas donde ventas > 1000','Devuelve un DataFrame filtrado con filas donde ventas supera 1000','Crea una nueva columna ventas con valor 1000','Ordena el DataFrame por ventas de mayor a menor'], ans:1, pts:10 },
+  { t:'VF', b:6, q:'La librería "great_expectations" de Python permite definir y ejecutar suites de pruebas de calidad de datos programáticamente.',
+    ops:['Verdadero','Falso'], ans:0, pts:10 },
+  { t:'MC', b:6, q:'¿Cuál calcula el porcentaje de valores nulos por columna en Pandas?',
+    ops:['df.null_percent()','df.isnull().sum() / len(df) * 100','df.count_nulls(axis=1)','pd.missing_values(df)'], ans:1, pts:10 },
+  { t:'SC', b:6, q:'¿Qué tan esencial es Python para un profesional en Ingeniería de Datos hoy? (1=prescindible, 5=indispensable)',
+    min:1, max:5, pts:5 },
+  { t:'PA', b:6, q:'Diseña un pipeline Python que lea un CSV de ventas, trate valores nulos, valide fechas, elimine duplicados y exporte el resultado. Explica la librería de cada paso.',
+    pts:10 },
+];
+
+/* ─── AVATARES Y COLORES ─── */
+const AVATAR_COLORS = [
+  '#00e5ff','#ff6b35','#7c3aed','#00ff88','#ffd700',
+  '#ff3b5c','#a855f7','#06b6d4','#f59e0b','#10b981'
+];
+
+/* ─── ESTADO DEL JUEGO ─── */
+let state = {
+  players: [],
+  currentPlayer: null,
+  currentQ: 0,
+  answers: {},       // { playerIdx: { qIdx: { answered, pts } } }
+  timerInterval: null,
+  timeLeft: 20,
+  answered: false,
+  currentBloque: 0,
+  phase: 'lobby',    // lobby | game | leaderboard | podium
+};
+
+/* ════════════ PARTICLES ════════════ */
+function initParticles() {
+  const wrap = document.getElementById('particles');
+  for (let i = 0; i < 18; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.cssText = `
+      left:${Math.random()*100}%;
+      top:${Math.random()*100}%;
+      --dx:${(Math.random()-0.5)*200}px;
+      --dy:${(Math.random()-0.5)*200}px;
+      animation-delay:${Math.random()*6}s;
+      animation-duration:${4+Math.random()*4}s;
+      background:${AVATAR_COLORS[Math.floor(Math.random()*AVATAR_COLORS.length)]};
+      opacity:0;
+    `;
+    wrap.appendChild(p);
+  }
+}
+
+/* ════════════ REGISTRO DE JUGADORES ════════════ */
+function registerPlayer() {
+  const name = document.getElementById('player-name').value.trim();
+  const avatar = document.getElementById('player-avatar').value;
+  if (!name) { shakeInput(); return; }
+  if (state.players.find(p => p.name.toLowerCase() === name.toLowerCase())) {
+    alert('Ya existe un jugador con ese nombre.'); return;
+  }
+  const color = AVATAR_COLORS[state.players.length % AVATAR_COLORS.length];
+  const player = { name, avatar, color, score: 0, correct: 0, streak: 0 };
+  state.players.push(player);
+  state.answers[state.players.length - 1] = {};
+  document.getElementById('player-name').value = '';
+
+  renderPlayerList();
+  document.getElementById('players-waiting-card').style.display = 'block';
+  if (state.players.length >= 1) {
+    document.getElementById('btn-start').classList.add('visible');
+  }
+}
+
+function renderPlayerList() {
+  const list = document.getElementById('players-list');
+  const count = document.getElementById('player-count');
+  count.textContent = state.players.length;
+  list.innerHTML = state.players.map((p, i) => `
+    <div class="player-chip">
+      <div class="avatar" style="background:${p.color}20;color:${p.color}">${p.avatar}</div>
+      ${p.name}
+    </div>
+  `).join('');
+}
+
+function shakeInput() {
+  const inp = document.getElementById('player-name');
+  inp.style.borderColor = 'var(--red)';
+  inp.style.animation = 'shake 0.4s ease';
+  setTimeout(() => { inp.style.borderColor = ''; inp.style.animation = ''; }, 500);
+}
+
+/* ════════════ INICIAR JUEGO ════════════ */
+function startGame() {
+  if (state.players.length < 1) return;
+  state.currentQ = 0;
+  state.currentBloque = 0;
+  state.phase = 'game';
+  showScreen('screen-game');
+  document.getElementById('q-total').textContent = PREGUNTAS.length;
+  renderLiveScores();
+  loadQuestion(0);
+}
+
+/* ════════════ CARGAR PREGUNTA ════════════ */
+function loadQuestion(idx) {
+  state.currentQ = idx;
+  state.answered = false;
+  const q = PREGUNTAS[idx];
+
+  // Check bloque change
+  const bloque = BLOQUES.find(b => idx >= b.inicio && idx < b.fin);
+  if (bloque) document.getElementById('bloque-indicator').textContent = bloque.nombre;
+
+  // Header
+  document.getElementById('q-current').textContent = idx + 1;
+  document.getElementById('progress-bar').style.width = `${((idx+1)/PREGUNTAS.length)*100}%`;
+  document.getElementById('question-num').textContent = `PREGUNTA ${idx + 1}`;
+  document.getElementById('question-text').textContent = q.q;
+
+  const typeBadge = document.getElementById('question-type-badge');
+  const typeLabels = { MC:'Selección única', VF:'Verdadero / Falso', CB:'Múltiple respuesta', TX:'Respuesta corta', PA:'Respuesta abierta', SC:'Escala de valoración' };
+  typeBadge.textContent = typeLabels[q.t] || q.t;
+
+  // Render answer area
+  const area = document.getElementById('answer-area');
+  area.innerHTML = '';
+
+  if (q.t === 'MC') {
+    area.innerHTML = `<div class="options-grid">${q.ops.map((op,i) =>
+      `<button class="option-btn" onclick="answerMC(${i})" id="opt-${i}">
+        <span class="opt-letter">${'ABCD'[i]}</span>
+        <span>${op}</span>
+      </button>`
+    ).join('')}</div>`;
+  } else if (q.t === 'VF') {
+    area.innerHTML = `<div class="vf-grid">
+      <button class="vf-btn v" onclick="answerVF(0)" id="opt-0">✓ Verdadero</button>
+      <button class="vf-btn f" onclick="answerVF(1)" id="opt-1">✗ Falso</button>
+    </div>`;
+  } else if (q.t === 'CB') {
+    area.innerHTML = `
+      <div class="options-grid" id="cb-grid">${q.ops.map((op,i) =>
+        `<button class="option-btn" onclick="toggleCB(${i})" id="opt-${i}" data-sel="false">
+          <span class="opt-letter" id="opt-l-${i}">${'ABCDE'[i]}</span>
+          <span>${op}</span>
+        </button>`
+      ).join('')}</div>
+      <div style="display:flex;justify-content:flex-end;margin-top:12px">
+        <button class="btn-submit" onclick="submitCB()">Confirmar →</button>
+      </div>`;
+  } else if (q.t === 'TX') {
+    area.innerHTML = `
+      <div class="text-answer-wrap">
+        <input type="text" class="text-answer" id="tx-input" placeholder="Escribe tu respuesta aquí..." style="min-height:52px">
+        <button class="btn-submit" onclick="submitTX()">Confirmar →</button>
+      </div>`;
+    document.getElementById('tx-input').addEventListener('keydown', e => { if (e.key==='Enter') submitTX(); });
+  } else if (q.t === 'PA') {
+    area.innerHTML = `
+      <div class="text-answer-wrap">
+        <textarea class="text-answer" id="pa-input" placeholder="Desarrolla tu respuesta aquí..."></textarea>
+        <button class="btn-submit" onclick="submitPA()">Confirmar →</button>
+      </div>`;
+  } else if (q.t === 'SC') {
+    const opts = [];
+    for (let v = q.min; v <= q.max; v++) opts.push(v);
+    area.innerHTML = `
+      <div class="scale-wrap">
+        <div class="scale-opts">${opts.map(v =>
+          `<button class="scale-btn" onclick="answerSC(${v})" id="sc-${v}">${v}</button>`
+        ).join('')}</div>
+        <div class="scale-labels"><span>${q.min}</span><span>${q.max}</span></div>
+      </div>`;
+  }
+
+  // Timer
+  clearInterval(state.timerInterval);
+  const timeForType = { MC:20, VF:15, CB:25, TX:30, PA:60, SC:15 };
+  state.timeLeft = timeForType[q.t] || 20;
+  updateTimerDisplay();
+  state.timerInterval = setInterval(tickTimer, 1000);
+}
+
+function tickTimer() {
+  state.timeLeft--;
+  updateTimerDisplay();
+  if (state.timeLeft <= 0) {
+    clearInterval(state.timerInterval);
+    if (!state.answered) timeoutQuestion();
+  }
+}
+
+function updateTimerDisplay() {
+  const el = document.getElementById('timer-display');
+  el.textContent = state.timeLeft;
+  el.classList.toggle('urgent', state.timeLeft <= 5);
+}
+
+function timeoutQuestion() {
+  state.answered = true;
+  showFeedback(false, 0, '⏱️ ¡Tiempo!');
+  revealAnswer();
+  setTimeout(advanceQuestion, 1800);
+}
+
+/* ════════════ RESPUESTAS ════════════ */
+function answerMC(i) {
+  if (state.answered) return;
+  state.answered = true;
+  clearInterval(state.timerInterval);
+  const q = PREGUNTAS[state.currentQ];
+  const correct = i === q.ans;
+  document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+  document.getElementById(`opt-${i}`).classList.add(correct ? 'correct' : 'wrong');
+  if (!correct) document.getElementById(`opt-${q.ans}`).classList.add('correct');
+  awardPoints(correct, q.pts, state.timeLeft);
+  setTimeout(advanceQuestion, 1600);
+}
+
+function answerVF(i) {
+  if (state.answered) return;
+  state.answered = true;
+  clearInterval(state.timerInterval);
+  const q = PREGUNTAS[state.currentQ];
+  const correct = i === q.ans;
+  document.querySelectorAll('.vf-btn').forEach(b => b.disabled = true);
+  document.getElementById(`opt-${i}`).classList.add(correct ? 'correct' : 'wrong');
+  if (!correct) document.getElementById(`opt-${q.ans}`).classList.add('correct');
+  awardPoints(correct, q.pts, state.timeLeft);
+  setTimeout(advanceQuestion, 1600);
+}
+
+function toggleCB(i) {
+  const btn = document.getElementById(`opt-${i}`);
+  const sel = btn.dataset.sel === 'true';
+  btn.dataset.sel = !sel;
+  btn.classList.toggle('selected', !sel);
+  document.getElementById(`opt-l-${i}`).style.background = !sel ? 'var(--accent3)' : '';
+  document.getElementById(`opt-l-${i}`).style.color = !sel ? 'white' : '';
+}
+
+function submitCB() {
+  if (state.answered) return;
+  state.answered = true;
+  clearInterval(state.timerInterval);
+  const q = PREGUNTAS[state.currentQ];
+  const selected = [];
+  q.ops.forEach((_, i) => {
+    if (document.getElementById(`opt-${i}`)?.dataset.sel === 'true') selected.push(i);
+  });
+  const correct = JSON.stringify(selected.sort()) === JSON.stringify(q.ans.sort());
+  // Reveal
+  q.ops.forEach((_, i) => {
+    const btn = document.getElementById(`opt-${i}`);
+    if (btn) {
+      btn.disabled = true;
+      if (q.ans.includes(i)) btn.classList.add('correct');
+      else if (selected.includes(i)) btn.classList.add('wrong');
+    }
+  });
+  awardPoints(correct, q.pts, state.timeLeft);
+  setTimeout(advanceQuestion, 1800);
+}
+
+function submitTX() {
+  if (state.answered) return;
+  state.answered = true;
+  clearInterval(state.timerInterval);
+  const q = PREGUNTAS[state.currentQ];
+  const val = document.getElementById('tx-input').value.trim().toLowerCase();
+  const answerNorm = (typeof q.ans === 'string') ? q.ans.toLowerCase() : '';
+  const correct = val.length > 0 && (val.includes(answerNorm) || answerNorm.includes(val));
+  document.getElementById('tx-input').disabled = true;
+  document.getElementById('tx-input').style.borderColor = correct ? 'var(--green)' : 'var(--red)';
+  awardPoints(correct, q.pts, state.timeLeft);
+  setTimeout(advanceQuestion, 1800);
+}
+
+function submitPA() {
+  if (state.answered) return;
+  state.answered = true;
+  clearInterval(state.timerInterval);
+  const val = document.getElementById('pa-input').value.trim();
+  const hasContent = val.length > 20;
+  document.getElementById('pa-input').disabled = true;
+  // Párrafos siempre reciben puntos parciales si escribieron algo
+  awardPoints(hasContent, PREGUNTAS[state.currentQ].pts * 0.7, state.timeLeft, true);
+  setTimeout(advanceQuestion, 2000);
+}
+
+function answerSC(v) {
+  if (state.answered) return;
+  state.answered = true;
+  clearInterval(state.timerInterval);
+  document.querySelectorAll('.scale-btn').forEach(b => b.disabled = true);
+  document.getElementById(`sc-${v}`).classList.add('selected');
+  // Escalas siempre suman puntos completos (opinión)
+  awardPoints(true, PREGUNTAS[state.currentQ].pts, state.timeLeft, true);
+  setTimeout(advanceQuestion, 1200);
+}
+
+function revealAnswer() {
+  const q = PREGUNTAS[state.currentQ];
+  if (q.t === 'MC') {
+    document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+    const el = document.getElementById(`opt-${q.ans}`);
+    if (el) el.classList.add('correct');
+  } else if (q.t === 'VF') {
+    document.querySelectorAll('.vf-btn').forEach(b => b.disabled = true);
+    const el = document.getElementById(`opt-${q.ans}`);
+    if (el) el.classList.add('correct');
+  }
+}
+
+function awardPoints(correct, basePts, timeLeft, alwaysPartial = false) {
+  // Bonus de velocidad: hasta +5 pts extra si responde en los primeros 10s
+  const speedBonus = correct ? Math.floor(Math.max(0, timeLeft - 5) / 2) : 0;
+  const earnedPts  = correct ? Math.round(basePts + speedBonus) : 0;
+
+  // Registrar para todos los jugadores (en modo demo, aplica al primero; el docente puede gestionar jugadores reales)
+  state.players.forEach((p, pi) => {
+    if (!state.answers[pi]) state.answers[pi] = {};
+    // Solo al jugador "activo" si hay uno, si no a todos por igual
+    if (pi === 0 || state.players.length === 1) {
+      state.answers[pi][state.currentQ] = { correct, pts: earnedPts };
+      p.score += earnedPts;
+      if (correct) { p.correct++; p.streak++; }
+      else p.streak = 0;
+    }
+  });
+
+  showFeedback(correct, earnedPts, speedBonus > 0 ? `+${speedBonus} velocidad` : '');
+  renderLiveScores();
+}
+
+/* ════════════ FEEDBACK OVERLAY ════════════ */
+function showFeedback(correct, pts, label = '') {
+  const ov = document.getElementById('feedback-overlay');
+  document.getElementById('feedback-icon').textContent = correct ? '✅' : '❌';
+  document.getElementById('feedback-text').textContent = correct ? '¡Correcto!' : 'Incorrecto';
+  document.getElementById('feedback-pts').textContent = pts > 0 ? `+${Math.round(pts)} pts ${label}` : label;
+  document.getElementById('feedback-text').style.color = correct ? 'var(--green)' : 'var(--red)';
+  ov.classList.add('show');
+  playSound(correct ? 'correct' : 'wrong');
+  setTimeout(() => ov.classList.remove('show'), 900);
+}
+
+/* ════════════ AVANZAR PREGUNTA ════════════ */
+function advanceQuestion() {
+  const next = state.currentQ + 1;
+  if (next >= PREGUNTAS.length) {
+    showPodium(); return;
+  }
+  // Detectar fin de bloque
+  const bloque = BLOQUES.findIndex(b => state.currentQ >= b.inicio && state.currentQ < b.fin);
+  const nextBloque = BLOQUES.findIndex(b => next >= b.inicio && next < b.fin);
+  if (nextBloque !== bloque && bloque !== -1) {
+    showLeaderboard(bloque, next);
+  } else {
+    loadQuestion(next);
+  }
+}
+
+/* ════════════ LIVE SCORES ════════════ */
+function renderLiveScores() {
+  const wrap = document.getElementById('live-scores');
+  wrap.innerHTML = state.players.map((p, i) => `
+    <div class="score-pill" id="pill-${i}">
+      <div class="dot" style="background:${p.color}20;color:${p.color}">${p.avatar}</div>
+      <span style="font-size:12px">${p.name.split(' ')[0]}</span>
+      <span class="pts">${p.score}</span>
+    </div>
+  `).join('');
+}
+
+/* ════════════ LEADERBOARD INTERMEDIO ════════════ */
+function showLeaderboard(bloqueIdx, nextQ) {
+  clearInterval(state.timerInterval);
+  showScreen('screen-leaderboard');
+  const bloque = BLOQUES[bloqueIdx];
+  document.getElementById('lb-subtitle').textContent = `Resultados · ${bloque.nombre}`;
+  document.getElementById('lb-heading').textContent = `🏁 Fin del ${bloque.nombre}`;
+  document.getElementById('btn-next-block').textContent =
+    nextQ < PREGUNTAS.length ? `${BLOQUES[bloqueIdx+1]?.nombre || 'Siguiente bloque'} →` : '🏆 Ver podio final';
+  document.getElementById('btn-next-block').onclick = () => {
+    if (nextQ >= PREGUNTAS.length) showPodium();
+    else { showScreen('screen-game'); loadQuestion(nextQ); }
+  };
+
+  const sorted = [...state.players].sort((a,b) => b.score - a.score);
+  const rankClasses = ['r1','r2','r3'];
+  document.getElementById('lb-table').innerHTML = sorted.map((p, i) => `
+    <div class="lb-row" style="animation-delay:${i*0.08}s">
+      <div class="lb-rank ${rankClasses[i] || 'rn'}">${i+1}</div>
+      <div class="lb-avatar" style="background:${p.color}20;color:${p.color}">${p.avatar}</div>
+      <div class="lb-name">${p.name}</div>
+      <div class="lb-correct">${p.correct} ✓</div>
+      <div class="lb-score">${p.score}</div>
+    </div>
+  `).join('');
+  playSound('levelup');
+}
+
+function continueGame() {
+  // handled inline per button
+}
+
+/* ════════════ PODIO FINAL ════════════ */
+function showPodium() {
+  clearInterval(state.timerInterval);
+  showScreen('screen-podium');
+  const sorted = [...state.players].sort((a,b) => b.score - a.score);
+  const top3 = sorted.slice(0, 3);
+
+  // Arrange: 2nd, 1st, 3rd
+  const arranged = top3.length >= 2
+    ? [top3[1], top3[0], top3[2]].filter(Boolean)
+    : [top3[0]].filter(Boolean);
+
+  const positions = top3.length >= 2 ? ['p2','p1','p3'] : ['p1'];
+  const crowns = ['🥈','🥇','🥉'];
+  const crownMap = [1, 0, 2]; // index in top3
+
+  document.getElementById('podium-stage').innerHTML = arranged.map((p, i) => {
+    const posClass = positions[i];
+    const crown = posClass === 'p1' ? '👑' : posClass === 'p2' ? '🥈' : '🥉';
+    const rankNum = posClass === 'p1' ? '1' : posClass === 'p2' ? '2' : '3';
+    return `
+    <div class="podium-slot ${posClass}">
+      <div class="podium-player">
+        <div class="podium-crown">${crown}</div>
+        <div class="podium-avatar" style="background:${p.color}20;color:${p.color}">${p.avatar}</div>
+        <div class="podium-pname">${p.name}</div>
+        <div class="podium-pscore">${p.score} pts · ${p.correct} ✓</div>
+      </div>
+      <div class="podium-bar">${rankNum}</div>
+    </div>`;
+  }).join('');
+
+  // Full results table
+  document.getElementById('full-results-body').innerHTML = sorted.map((p, i) => `
+    <div class="lb-row" style="animation-delay:${i*0.06}s">
+      <div class="lb-rank ${['r1','r2','r3'][i] || 'rn'}">${i+1}</div>
+      <div class="lb-avatar" style="background:${p.color}20;color:${p.color}">${p.avatar}</div>
+      <div class="lb-name">${p.name}</div>
+      <div class="lb-correct">${p.correct}/${PREGUNTAS.length} correctas</div>
+      <div class="lb-score">${p.score} pts</div>
+    </div>
+  `).join('');
+
+  launchConfetti();
+  playSound('victory');
+}
+
+/* ════════════ CONFETTI ════════════ */
+function launchConfetti() {
+  const colors = ['#ffd700','#00e5ff','#ff6b35','#7c3aed','#00ff88','#ff3b5c','#fff'];
+  const container = document.getElementById('confetti-container');
+  container.innerHTML = '';
+  for (let i = 0; i < 90; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti-piece';
+    c.style.cssText = `
+      left:${Math.random()*100}%;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      width:${6+Math.random()*8}px;
+      height:${6+Math.random()*8}px;
+      border-radius:${Math.random()>0.5?'50%':'2px'};
+      animation-duration:${2+Math.random()*3}s;
+      animation-delay:${Math.random()*1.5}s;
+    `;
+    container.appendChild(c);
+  }
+  setTimeout(() => { container.innerHTML = ''; }, 6000);
+}
+
+/* ════════════ SONIDO (Web Audio API) ════════════ */
+let audioCtx;
+function getAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+function playSound(type) {
+  try {
+    const ctx = getAudio();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    if (type === 'correct') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(523, ctx.currentTime);
+      osc.frequency.setValueAtTime(659, ctx.currentTime + 0.1);
+      osc.frequency.setValueAtTime(784, ctx.currentTime + 0.2);
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+      osc.start(); osc.stop(ctx.currentTime + 0.5);
+    } else if (type === 'wrong') {
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(300, ctx.currentTime);
+      osc.frequency.setValueAtTime(200, ctx.currentTime + 0.15);
+      gain.gain.setValueAtTime(0.1, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+      osc.start(); osc.stop(ctx.currentTime + 0.3);
+    } else if (type === 'levelup') {
+      osc.type = 'sine';
+      [523,659,784,1047].forEach((f,i) => osc.frequency.setValueAtTime(f, ctx.currentTime + i*0.1));
+      gain.gain.setValueAtTime(0.1, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+      osc.start(); osc.stop(ctx.currentTime + 0.6);
+    } else if (type === 'victory') {
+      osc.type = 'sine';
+      [523,659,784,1047,1319].forEach((f,i) => osc.frequency.setValueAtTime(f, ctx.currentTime + i*0.12));
+      gain.gain.setValueAtTime(0.12, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1);
+      osc.start(); osc.stop(ctx.currentTime + 1);
+    }
+  } catch(e) {}
+}
+
+/* ════════════ NAVEGACIÓN ════════════ */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function restartGame() {
+  state = {
+    players: [], currentPlayer: null, currentQ: 0,
+    answers: {}, timerInterval: null, timeLeft: 20,
+    answered: false, currentBloque: 0, phase: 'lobby'
+  };
+  document.getElementById('players-waiting-card').style.display = 'none';
+  document.getElementById('btn-start').classList.remove('visible');
+  document.getElementById('players-list').innerHTML = '';
+  document.getElementById('player-count').textContent = '0';
+  showScreen('screen-lobby');
+}
+
+/* ════════════ INIT ════════════ */
+initParticles();
+
+// Allow Enter to register player
+document.getElementById('player-name').addEventListener('keydown', e => {
+  if (e.key === 'Enter') registerPlayer();
+});
+
+// Keyboard shortcuts during game
+document.addEventListener('keydown', e => {
+  if (state.phase !== 'game' || state.answered) return;
+  const q = PREGUNTAS[state.currentQ];
+  if (q.t === 'MC' && ['a','b','c','d'].includes(e.key.toLowerCase())) {
+    const idx = ['a','b','c','d'].indexOf(e.key.toLowerCase());
+    if (idx < q.ops.length) answerMC(idx);
+  }
+  if (q.t === 'VF') {
+    if (e.key === 'v' || e.key === 'V') answerVF(0);
+    if (e.key === 'f' || e.key === 'F') answerVF(1);
+  }
+});
+</script>
+</body>
+</html>

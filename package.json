@@ -1,5 +1,58 @@
 {
   "dependencies": {
     "express": "^4.19.2"
+  "name": "coquito-amarillo-api-lpm01-201-3",
+  "version": "1.0.0",
+  "description": "LPM01-201-3 U4AEAE1 API-REST+NodeJS+Express directamente en codesapaces de GitHub.",
+  "main": "index.js",
+  "scripts": {
+  "dev": "nodemon src/app.js",
+  "start": "node src/app.js",
+  "test": "jest"
+},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/josechepeg/coquito-amarillo-api-LPM01-201-3.git"
+  "name": "feature-valentina-arias",
+  "version": "1.0.0",
+  "description": "LPM01-201-3 U4AEAE1 API-REST+NodeJS+Express directamente en codesapaces de GitHub.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/torresjuandavid698-create/coquito-amarillo-api-LPM01-201-3.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/torresjuandavid698-create/coquito-amarillo-api-LPM01-201-3/issues"
+    "url": "https://github.com/josechepeg/coquito-amarillo-api-LPM01-201-3/issues"
+  },
+  "homepage": "https://github.com/josechepeg/coquito-amarillo-api-LPM01-201-3#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "jest": "^30.3.0",
+    "nodemon": "^3.1.14"
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  },
+  "homepage": "https://github.com/torresjuandavid698-create/coquito-amarillo-api-LPM01-201-3#readme",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "jest": "^30.4.2",
+    "nodemon": "^3.1.14",
+    "supertest": "^7.2.2"
   }
 }

@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>T'essence</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23f2f2f0'/><text x='50' y='78' text-anchor='middle' font-family='Georgia,serif' font-size='57' font-weight='300' fill='%23111111'>T</text><text x='71' y='40' text-anchor='middle' font-family='Georgia,serif' font-size='19' fill='%23c9a96e'>'</text><rect x='17' y='88' width='65' height='1.5' fill='%23c9a96e'/></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#f2f2f0;--white:#ffffff;--black:#111111;
+  --gold:#b8976a;--gray:#999;--light:#e8e8e4;
+  --nav-h:60px;--bottom-h:64px;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);font-family:Helvetica,Arial,sans-serif;font-weight:300;color:var(--black);min-height:100vh;-webkit-font-smoothing:antialiased;}
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--light);}
+.page{display:none;}
+.page.active{display:block;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;justify-content:space-between;align-items:center;padding:0 3rem;height:var(--nav-h);background:var(--bg);border-bottom:1px solid rgba(0,0,0,0.07);}
+.logo{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:300;letter-spacing:0.25em;color:var(--black);cursor:pointer;}
+.logo span{color:var(--gold);}
+.nav-center{display:flex;gap:2rem;align-items:center;}
+.nav-center a{font-size:0.6rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--gray);cursor:pointer;transition:color 0.2s;}
+.nav-center a:hover{color:var(--black);}
+.nav-right{display:flex;align-items:center;gap:1rem;}
+.cart-trigger{display:flex;align-items:center;gap:0.5rem;font-size:0.6rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--black);cursor:pointer;background:none;border:none;font-family:inherit;font-weight:300;}
+.cart-bubble{width:18px;height:18px;border-radius:50%;background:var(--gold);color:var(--white);font-size:0.5rem;display:flex;align-items:center;justify-content:center;}
+
+/* BOTTOM NAV MOBILE */
+.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:1000;height:var(--bottom-h);background:var(--white);border-top:1px solid rgba(0,0,0,0.07);justify-content:space-around;align-items:center;}
+.bn-item{display:flex;flex-direction:column;align-items:center;gap:0.25rem;cursor:pointer;background:none;border:none;color:var(--gray);transition:color 0.2s;flex:1;font-family:inherit;padding:0.5rem 0;}
+.bn-item.active{color:var(--black);}
+.bn-item span{font-size:0.42rem;letter-spacing:0.15em;text-transform:uppercase;}
+.bn-cart{position:relative;}
+.bn-bubble{position:absolute;top:2px;right:calc(50% - 18px);width:14px;height:14px;border-radius:50%;background:var(--gold);color:var(--white);font-size:0.4rem;display:flex;align-items:center;justify-content:center;}
+
+/* BTN */
+.btn{display:inline-block;font-size:0.6rem;letter-spacing:0.25em;text-transform:uppercase;padding:0.85rem 2rem;cursor:pointer;transition:all 0.25s;border:none;font-family:inherit;font-weight:300;}
+.btn-dark{background:var(--black);color:var(--white);}
+.btn-dark:hover{background:var(--gold);}
+.btn-outline{background:none;border:1px solid var(--black);color:var(--black);}
+.btn-outline:hover{background:var(--black);color:var(--white);}
+
+/* HOME */
+#home{padding-top:var(--nav-h);}
+.hero{display:grid;grid-template-columns:1fr 1fr;min-height:88vh;}
+.hero-left{padding:4rem 3rem;display:flex;flex-direction:column;justify-content:center;}
+.hero-tag{font-size:0.5rem;letter-spacing:0.35em;text-transform:uppercase;color:var(--gold);margin-bottom:1.5rem;}
+.hero-left h1{font-family:'Cormorant Garamond',serif;font-size:4.5rem;font-weight:300;line-height:1.0;margin-bottom:1.5rem;}
+.hero-left h1 em{font-style:italic;color:var(--gold);}
+.hero-left p{font-size:0.68rem;letter-spacing:0.1em;line-height:2.2;color:var(--gray);max-width:300px;margin-bottom:2.5rem;}
+.hero-right{background:var(--white);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.hero-img{width:100%;height:100%;object-fit:cover;display:block;}
+.hero-label{position:absolute;bottom:2rem;left:2rem;font-size:0.5rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--white);background:rgba(0,0,0,0.35);padding:0.3rem 0.6rem;}
+.hero-season{position:absolute;top:2rem;right:2rem;font-family:'Cormorant Garamond',serif;font-size:2.5rem;font-weight:300;color:rgba(255,255,255,0.5);}
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid rgba(0,0,0,0.06);}
+.stat{padding:2rem 2.5rem;border-right:1px solid rgba(0,0,0,0.06);}
+.stat:last-child{border-right:none;}
+.stat-num{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;margin-bottom:0.2rem;}
+.stat-label{font-size:0.5rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--gray);}
+.home-collection{padding:4rem 3rem;}
+.section-label{font-size:0.5rem;letter-spacing:0.35em;text-transform:uppercase;color:var(--gold);margin-bottom:0.8rem;}
+.section-title{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:300;margin-bottom:2.5rem;}
+.home-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(0,0,0,0.06);}
+.home-card{background:var(--bg);padding:2rem 1.5rem;cursor:pointer;transition:background 0.3s;}
+.home-card:hover{background:var(--white);}
+.home-card-img{height:200px;display:flex;align-items:center;justify-content:center;margin-bottom:1.2rem;overflow:hidden;}
+.home-card-img img{width:100%;height:100%;object-fit:cover;transition:transform 0.4s ease;}
+.home-card:hover .home-card-img img{transform:scale(1.05);}
+.home-card-cat{font-size:0.48rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:0.3rem;}
+.home-card-name{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:300;margin-bottom:0.3rem;}
+.home-card-price{font-size:0.6rem;letter-spacing:0.08em;color:var(--gray);}
+
+/* CATALOG */
+#catalog{padding-top:var(--nav-h);}
+.catalog-header{padding:3rem 3rem 2rem;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:1.5rem;}
+.catalog-header-left h1{font-family:'Cormorant Garamond',serif;font-size:2.5rem;font-weight:300;margin-bottom:0.3rem;}
+.catalog-header-left p{font-size:0.58rem;letter-spacing:0.15em;color:var(--gray);}
+.filters{display:flex;gap:0.4rem;flex-wrap:wrap;}
+.filter{font-size:0.52rem;letter-spacing:0.18em;text-transform:uppercase;padding:0.45rem 1rem;cursor:pointer;background:none;border:1px solid var(--light);color:var(--gray);font-family:inherit;font-weight:300;transition:all 0.2s;}
+.filter.active,.filter:hover{border-color:var(--black);color:var(--black);}
+.catalog-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(0,0,0,0.05);padding:1px;}
+.prod-card{background:var(--bg);cursor:pointer;transition:background 0.3s;position:relative;overflow:hidden;}
+.prod-card:hover{background:var(--white);}
+.prod-img{height:260px;overflow:hidden;}
+.prod-img img{width:100%;height:100%;object-fit:cover;transition:transform 0.4s ease;}
+.prod-card:hover .prod-img img{transform:scale(1.04);}
+.prod-info{padding:1.2rem 1.5rem 2.5rem;}
+.prod-cat{font-size:0.48rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:0.3rem;}
+.prod-name{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:300;margin-bottom:0.3rem;}
+.prod-price{font-size:0.6rem;letter-spacing:0.08em;color:var(--gray);}
+.prod-add{position:absolute;bottom:1.2rem;right:1.2rem;width:32px;height:32px;background:var(--black);color:var(--white);border:none;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;opacity:0;transform:translateY(4px);transition:all 0.25s;}
+.prod-card:hover .prod-add{opacity:1;transform:translateY(0);}
+.prod-add:hover{background:var(--gold);}
+
+/* DETAIL */
+#detail{padding-top:var(--nav-h);}
+.detail-wrap{display:grid;grid-template-columns:55% 45%;min-height:88vh;}
+.detail-visual{background:var(--white);overflow:hidden;position:relative;}
+.detail-visual img{width:100%;height:100%;object-fit:cover;display:block;}
+.size-chip{position:absolute;top:1.5rem;left:1.5rem;font-size:0.48rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--white);border:1px solid rgba(255,255,255,0.5);padding:0.35rem 0.7rem;background:rgba(0,0,0,0.3);}
+.detail-info{padding:3.5rem 2.5rem;display:flex;flex-direction:column;justify-content:center;}
+.back-btn{font-size:0.52rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--gray);cursor:pointer;background:none;border:none;font-family:inherit;font-weight:300;text-align:left;margin-bottom:2.5rem;transition:color 0.2s;display:flex;align-items:center;gap:0.4rem;}
+.back-btn:hover{color:var(--black);}
+.d-cat{font-size:0.5rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:0.7rem;}
+.d-name{font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:300;line-height:1.05;margin-bottom:0.8rem;}
+.d-price{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;color:var(--gold);margin-bottom:1.2rem;}
+.d-divider{width:36px;height:1px;background:var(--light);margin-bottom:2rem;}
+.d-desc{font-size:0.65rem;letter-spacing:0.1em;line-height:2.2;color:var(--gray);margin-bottom:2rem;max-width:360px;}
+.size-label-text{font-size:0.52rem;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:0.8rem;color:var(--gray);}
+.size-grid{display:flex;gap:0.4rem;margin-bottom:1.5rem;flex-wrap:wrap;}
+.sz{width:38px;height:38px;border:1px solid var(--light);background:none;font-family:inherit;font-size:0.58rem;cursor:pointer;transition:all 0.2s;color:var(--gray);}
+.sz.active,.sz:hover{border-color:var(--black);background:var(--black);color:var(--white);}
+.d-stock{font-size:0.55rem;letter-spacing:0.12em;color:var(--gray);margin-bottom:2rem;}
+.d-actions{display:flex;gap:0.7rem;flex-wrap:wrap;}
+
+/* CART */
+#cart{padding-top:var(--nav-h);}
+.cart-wrap{display:grid;grid-template-columns:1fr 380px;min-height:85vh;}
+.cart-main{padding:3rem 2.5rem;border-right:1px solid rgba(0,0,0,0.06);}
+.cart-main h1{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:300;margin-bottom:0.4rem;}
+.cart-sub{font-size:0.58rem;letter-spacing:0.12em;color:var(--gray);margin-bottom:2.5rem;}
+.c-item{display:grid;grid-template-columns:80px 1fr auto;gap:1.5rem;padding:1.5rem 0;border-bottom:1px solid rgba(0,0,0,0.06);align-items:start;}
+.c-img{background:var(--white);height:80px;overflow:hidden;}
+.c-img img{width:100%;height:100%;object-fit:cover;}
+.c-name{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:300;margin-bottom:0.3rem;}
+.c-meta{font-size:0.52rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--gray);margin-bottom:0.6rem;}
+.c-remove{font-size:0.48rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--gray);background:none;border:none;cursor:pointer;font-family:inherit;font-weight:300;padding:0;transition:color 0.2s;}
+.c-remove:hover{color:var(--black);}
+.c-price{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:300;white-space:nowrap;}
+.cart-empty-state{padding:5rem 0;text-align:center;}
+.cart-empty-state p{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;color:var(--gray);margin-bottom:1.5rem;}
+.cart-side{padding:3rem 2rem;background:var(--white);}
+.cart-side h2{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:300;margin-bottom:2rem;padding-bottom:1.2rem;border-bottom:1px solid rgba(0,0,0,0.06);}
+.sum-row{display:flex;justify-content:space-between;font-size:0.6rem;letter-spacing:0.1em;color:var(--gray);margin-bottom:0.9rem;}
+.sum-total{display:flex;justify-content:space-between;padding-top:1.2rem;margin-top:0.4rem;border-top:1px solid rgba(0,0,0,0.06);font-size:0.85rem;}
+.sum-total span:last-child{color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:1.3rem;}
+.pse-btn{width:100%;margin-top:1.8rem;padding:1rem;background:var(--black);color:var(--white);border:none;font-family:inherit;font-weight:300;font-size:0.58rem;letter-spacing:0.28em;text-transform:uppercase;cursor:pointer;transition:background 0.25s;}
+.pse-btn:hover{background:var(--gold);}
+.security-note{font-size:0.48rem;letter-spacing:0.1em;color:var(--gray);text-align:center;margin-top:0.8rem;line-height:1.8;}
+
+/* PSE */
+#pse{padding-top:var(--nav-h);}
+.pse-wrap{max-width:600px;margin:0 auto;padding:3.5rem 2rem;}
+.pse-wrap h1{font-family:'Cormorant Garamond',serif;font-size:2.8rem;font-weight:300;margin-bottom:0.4rem;}
+.pse-sub-title{font-size:0.58rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--gray);margin-bottom:2.5rem;}
+.pse-amount-box{background:var(--white);padding:1.8rem;display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;}
+.pse-amount-box span:first-child{font-size:0.58rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--gray);}
+.pse-amount-box span:last-child{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;color:var(--gold);}
+.f-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.f-full{grid-column:1/-1;}
+.fg{display:flex;flex-direction:column;gap:0.4rem;}
+.fg label{font-size:0.52rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--gray);}
+.fg input,.fg select{border:1px solid var(--light);padding:0.7rem 0.9rem;font-family:inherit;font-weight:300;font-size:0.7rem;background:var(--white);color:var(--black);outline:none;transition:border-color 0.2s;-webkit-appearance:none;appearance:none;}
+.fg input:focus,.fg select:focus{border-color:var(--black);}
+.confirm-btn{width:100%;padding:1rem;margin-top:1.8rem;background:var(--black);color:var(--white);border:none;font-family:inherit;font-weight:300;font-size:0.58rem;letter-spacing:0.28em;text-transform:uppercase;cursor:pointer;transition:background 0.25s;}
+.confirm-btn:hover{background:var(--gold);}
+.pse-loading{display:none;text-align:center;padding:2.5rem;font-size:0.58rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--gray);}
+.pse-loading.show{display:block;}
+.pse-success{display:none;margin-top:1.8rem;background:var(--black);padding:2rem;}
+.pse-success.show{display:block;}
+.pse-success h3{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:300;color:var(--gold);margin-bottom:0.8rem;}
+.pse-success p{font-size:0.6rem;letter-spacing:0.1em;line-height:2;color:#999;}
+.txn-ref{color:var(--white);margin-top:0.8rem;font-family:'Cormorant Garamond',serif;font-size:1rem;}
+.estado{color:var(--gold);font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;margin-top:0.8rem;display:block;}
+
+/* PASSWORD INPUT */
+.pass-wrap{position:relative;}
+.pass-wrap input{width:100%;padding-right:2.5rem;}
+.pass-eye{position:absolute;right:0.8rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--gray);display:flex;align-items:center;}
+.pass-eye:hover{color:var(--black);}
+
+/* GUEST NOTE */
+.guest-note{background:var(--light);padding:1rem 1.2rem;margin-bottom:1.5rem;font-size:0.58rem;letter-spacing:0.1em;color:var(--gray);line-height:1.8;}
+.guest-note span{color:var(--gold);cursor:pointer;}
+
+/* PERFIL */
+#perfil{padding-top:var(--nav-h);}
+.perfil-wrap{max-width:800px;margin:0 auto;padding:3.5rem 2rem;}
+.perfil-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:3rem;padding-bottom:1.5rem;border-bottom:1px solid rgba(0,0,0,0.06);}
+.perfil-header h1{font-family:'Cormorant Garamond',serif;font-size:2.5rem;font-weight:300;}
+.perfil-avatar{width:60px;height:60px;border-radius:50%;background:var(--black);color:var(--white);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:300;flex-shrink:0;}
+.perfil-section{margin-bottom:2.5rem;}
+.perfil-section h2{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:300;margin-bottom:1.2rem;padding-bottom:0.8rem;border-bottom:1px solid rgba(0,0,0,0.06);}
+.perfil-info{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;}
+.perfil-field{display:flex;flex-direction:column;gap:0.3rem;}
+.perfil-field label{font-size:0.5rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gray);}
+.perfil-field span{font-size:0.75rem;letter-spacing:0.05em;color:var(--black);}
+.perfil-compra{display:grid;grid-template-columns:70px 1fr auto;gap:1rem;padding:1rem 0;border-bottom:1px solid rgba(0,0,0,0.06);align-items:center;}
+.perfil-compra-img{width:70px;height:70px;overflow:hidden;background:var(--light);}
+.perfil-compra-img img{width:100%;height:100%;object-fit:cover;}
+.perfil-compra-name{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:300;margin-bottom:0.2rem;}
+.perfil-compra-meta{font-size:0.5rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gray);}
+.perfil-compra-price{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:300;color:var(--gold);white-space:nowrap;}
+.perfil-empty{font-size:0.65rem;letter-spacing:0.1em;color:var(--gray);padding:1.5rem 0;}
+.btn-cerrar{background:none;border:1px solid rgba(0,0,0,0.15);color:var(--gray);padding:0.6rem 1.5rem;font-family:inherit;font-weight:300;font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+.btn-cerrar:hover{border-color:var(--black);color:var(--black);}
+
+/* NOTIFICACION */
+.notif{position:fixed;top:calc(var(--nav-h)+1rem);right:1.5rem;z-index:2000;background:var(--black);color:var(--white);padding:1rem 1.5rem;font-size:0.58rem;letter-spacing:0.15em;opacity:0;transform:translateY(-10px);transition:all 0.4s ease;pointer-events:none;}
+.notif.show{opacity:1;transform:translateY(0);}
+.notif span{color:var(--gold);}
+
+/* ═══ TABLET ═══ */
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr;}
+  .hero-right{min-height:300px;}
+  .hero-left h1{font-size:3.5rem;}
+  .home-grid{grid-template-columns:repeat(2,1fr);}
+  .catalog-grid{grid-template-columns:repeat(2,1fr);}
+  .stats-bar{grid-template-columns:repeat(2,1fr);}
+  .stat:nth-child(2){border-right:none;}
+  .stat:nth-child(3){border-top:1px solid rgba(0,0,0,0.06);}
+  .stat:nth-child(4){border-top:1px solid rgba(0,0,0,0.06);border-right:none;}
+  .detail-wrap{grid-template-columns:1fr;}
+  .detail-visual{min-height:320px;}
+  .cart-wrap{grid-template-columns:1fr;}
+  .cart-side{border-top:1px solid rgba(0,0,0,0.06);}
+  .catalog-header{flex-direction:column;align-items:flex-start;}
+  nav{padding:0 1.5rem;}
+  .home-collection{padding:3rem 1.5rem;}
+  .perfil-info{grid-template-columns:1fr;}
+}
+
+/* ═══ MOBILE ═══ */
+@media(max-width:600px){
+  :root{--nav-h:54px;}
+  .nav-center{display:none;}
+  .nav-right{display:none;}
+  .bottom-nav{display:flex;}
+  #home,#catalog,#detail,#cart,#pse,#perfil,#registro,#login{padding-bottom:calc(var(--bottom-h) + 0.5rem);}
+  nav{padding:0 1.2rem;}
+  .logo{font-size:1.2rem;}
+  .hero{grid-template-columns:1fr;min-height:auto;}
+  .hero-left{padding:2.5rem 1.2rem;}
+  .hero-left h1{font-size:2.8rem;}
+  .hero-left p{max-width:100%;}
+  .hero-right{min-height:220px;}
+  .hero-season{font-size:1.8rem;}
+  .stats-bar{grid-template-columns:1fr 1fr;}
+  .stat{padding:1.5rem 1.2rem;}
+  .stat:nth-child(2){border-right:none;}
+  .stat:nth-child(3){border-top:1px solid rgba(0,0,0,0.06);}
+  .stat:nth-child(4){border-top:1px solid rgba(0,0,0,0.06);border-right:none;}
+  .home-collection{padding:2.5rem 1.2rem;}
+  .section-title{font-size:1.8rem;}
+  .home-grid{grid-template-columns:repeat(2,1fr);}
+  .home-card{padding:1.2rem 0.8rem;}
+  .home-card-img{height:130px;}
+  .catalog-header{padding:2rem 1.2rem 1rem;}
+  .catalog-header-left h1{font-size:2rem;}
+  .catalog-grid{grid-template-columns:repeat(2,1fr);}
+  .prod-img{height:170px;}
+  .prod-info{padding:0.8rem 1rem 2.5rem;}
+  .prod-add{opacity:1;transform:translateY(0);}
+  .detail-wrap{grid-template-columns:1fr;}
+  .detail-visual{min-height:260px;}
+  .detail-info{padding:2rem 1.2rem;}
+  .d-name{font-size:2.2rem;}
+  .d-price{font-size:1.5rem;}
+  .d-actions{flex-direction:column;}
+  .d-actions .btn{width:100%;text-align:center;}
+  .back-btn{margin-bottom:1.5rem;}
+  .cart-wrap{grid-template-columns:1fr;}
+  .cart-main{padding:2rem 1.2rem;}
+  .cart-side{padding:1.5rem 1.2rem;}
+  .c-item{grid-template-columns:65px 1fr auto;gap:1rem;}
+  .cart-main h1{font-size:1.8rem;}
+  .pse-wrap{padding:2rem 1.2rem;}
+  .pse-wrap h1{font-size:2.2rem;}
+  .f-grid{grid-template-columns:1fr;}
+  .f-full{grid-column:1;}
+  .filters{flex-wrap:nowrap;overflow-x:auto;padding-bottom:0.4rem;}
+  .filters::-webkit-scrollbar{height:2px;}
+  .filter{white-space:nowrap;flex-shrink:0;}
+  .perfil-header{flex-direction:column;align-items:flex-start;gap:1rem;}
+  .perfil-compra{grid-template-columns:60px 1fr auto;}
+  .perfil-compra-img{width:60px;height:60px;}
+}
+</style>
+</head>
+<body>
+
+<div class="notif" id="notif"></div>
+
+<nav>
+  <div class="logo" onclick="showPage('home')">T<span>'</span>essence</div>
+  <div class="nav-center">
+    <a onclick="showPage('home')">Inicio</a>
+    <a onclick="showPage('catalog')">Colección</a>
+    <a onclick="showPage('registro')" id="nav-registro-link">Registro</a>
+    <a onclick="showPage('login')" id="nav-login-link">Iniciar sesión</a>
+    <a onclick="showPage('perfil')" id="nav-perfil-link" style="display:none;color:var(--gold);">Mi perfil</a>
+  </div>
+  <div class="nav-right">
+    <button class="cart-trigger" onclick="showPage('cart')">
+      <i data-lucide="shopping-bag" style="width:18px;height:18px;stroke-width:1.5;"></i>
+      <span class="cart-bubble" id="cartCount">0</span>
+    </button>
+  </div>
+</nav>
+
+<div class="bottom-nav">
+  <button class="bn-item active" id="bn-home" onclick="showPage('home');setBN('bn-home')">
+    <i data-lucide="home" style="width:20px;height:20px;stroke-width:1.5;"></i>
+    <span>Inicio</span>
+  </button>
+  <button class="bn-item" id="bn-catalog" onclick="showPage('catalog');setBN('bn-catalog')">
+    <i data-lucide="grid" style="width:20px;height:20px;stroke-width:1.5;"></i>
+    <span>Colección</span>
+  </button>
+  <button class="bn-item bn-cart" id="bn-cart" onclick="showPage('cart');setBN('bn-cart')">
+    <i data-lucide="shopping-bag" style="width:20px;height:20px;stroke-width:1.5;"></i>
+    <span class="bn-bubble" id="cartCountMobile">0</span>
+    <span>Carrito</span>
+  </button>
+  <button class="bn-item" id="bn-cuenta" onclick="irACuenta();setBN('bn-cuenta')">
+    <i data-lucide="user" style="width:20px;height:20px;stroke-width:1.5;"></i>
+    <span>Cuenta</span>
+  </button>
+  <button class="bn-item" id="bn-pse" onclick="showPage('pse');setBN('bn-pse')">
+    <i data-lucide="credit-card" style="width:20px;height:20px;stroke-width:1.5;"></i>
+    <span>Pagar</span>
+  </button>
+</div>
+
+<!-- HOME -->
+<div id="home" class="page active">
+  <div class="hero">
+    <div class="hero-left">
+      <div class="hero-tag">Colección 2026</div>
+      <h1>Viste tu<br><em>esencia</em></h1>
+      <p>Cada prenda es una extensión de quien eres. Esencia, calidad y autenticidad en cada detalle.</p>
+      <button class="btn btn-dark" onclick="showPage('catalog')">Explorar Colección</button>
+    </div>
+    <div class="hero-right">
+      <img class="hero-img" src="./img/imgportada.png" alt="Camiseta premium T'essence">
+      <div class="hero-label">Algodón Premium · Hecho en Colombia</div>
+      <div class="hero-season">2026</div>
+    </div>
+  </div>
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Algodón Premium</div></div>
+    <div class="stat"><div class="stat-num">Hecho</div><div class="stat-label">En Colombia</div></div>
+    <div class="stat"><div class="stat-num">8</div><div class="stat-label">Piezas Exclusivas</div></div>
+    <div class="stat"><div class="stat-num">∞</div><div class="stat-label">Estilo Atemporal</div></div>
+  </div>
+  <div class="home-collection">
+    <div class="section-label">Lo más reciente</div>
+    <div class="section-title">Colección Esencial</div>
+    <div class="home-grid" id="homeGrid"></div>
+    <div style="text-align:center;margin-top:2.5rem;">
+      <button class="btn btn-outline" onclick="showPage('catalog')">Ver toda la colección</button>
+    </div>
+  </div>
+</div>
+
+<!-- CATALOG -->
+<div id="catalog" class="page">
+  <div class="catalog-header">
+    <div class="catalog-header-left">
+      <div class="section-label">T'essence</div>
+      <h1>Colección 2026</h1>
+      <p id="catalogCount">8 piezas disponibles</p>
+    </div>
+    <div class="filters">
+      <button class="filter active" onclick="filterCat('all',this)">Todos</button>
+      <button class="filter" onclick="filterCat('basicas',this)">Básicas</button>
+      <button class="filter" onclick="filterCat('premium',this)">Premium</button>
+      <button class="filter" onclick="filterCat('edicion',this)">Edición Limitada</button>
+    </div>
+  </div>
+  <div class="catalog-grid" id="catalogGrid"></div>
+</div>
+
+<!-- DETAIL -->
+<div id="detail" class="page">
+  <div class="detail-wrap">
+    <div class="detail-visual">
+      <img id="d-img" src="" alt="">
+      <div class="size-chip" id="d-chip">Talla S</div>
+    </div>
+    <div class="detail-info">
+      <button class="back-btn" onclick="showPage('catalog')">← Volver</button>
+      <div class="d-cat" id="d-cat">Premium</div>
+      <div class="d-name" id="d-name">Camiseta</div>
+      <div class="d-price" id="d-price">$0</div>
+      <div class="d-divider"></div>
+      <div class="d-desc" id="d-desc">Descripción.</div>
+      <div class="size-label-text">Selecciona tu talla</div>
+      <div class="size-grid">
+        <button class="sz" onclick="pickSize(this,'XS')">XS</button>
+        <button class="sz active" onclick="pickSize(this,'S')">S</button>
+        <button class="sz" onclick="pickSize(this,'M')">M</button>
+        <button class="sz" onclick="pickSize(this,'L')">L</button>
+        <button class="sz" onclick="pickSize(this,'XL')">XL</button>
+      </div>
+      <div class="d-stock" id="d-stock"></div>
+      <div class="d-actions">
+        <button class="btn btn-dark" onclick="addFromDetail()">Agregar al carrito</button>
+        <button class="btn btn-outline" onclick="showPage('cart')">Ver carrito</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CART -->
+<div id="cart" class="page">
+  <div class="cart-wrap">
+    <div class="cart-main">
+      <h1>Tu Carrito</h1>
+      <p class="cart-sub" id="cartSubtitle">0 productos</p>
+      <div id="cartList"></div>
+    </div>
+    <div class="cart-side">
+      <h2>Resumen</h2>
+      <div class="sum-row"><span>Subtotal</span><span id="sumSub">$0</span></div>
+      <div class="sum-row"><span>Envío</span><span>Gratis</span></div>
+      <div class="sum-row"><span>IVA (19%)</span><span id="sumIva">$0</span></div>
+      <div class="sum-total"><span>Total</span><span id="sumTotal">$0</span></div>
+      <button class="pse-btn" onclick="showPage('pse')">Pagar</button>
+      <p class="security-note">Pago 100% seguro<br>ACH Colombia · Habeas Data Ley 1581</p>
+    </div>
+  </div>
+</div>
+
+<!-- PSE -->
+<div id="pse" class="page">
+  <div class="pse-wrap">
+    <button class="back-btn" onclick="showPage('cart')">← Volver al carrito</button>
+    <h1>Pago PSE</h1>
+    <p class="pse-sub-title">Pasarela Segura · ACH Colombia</p>
+
+    <!-- Nota sesion/invitado -->
+    <div id="pse-guest-note" class="guest-note" style="display:none;">
+      Compras como <strong>invitado</strong>. <span onclick="showPage('login')">Inicia sesión</span> para autocompletar tus datos.
+    </div>
+    <div id="pse-user-note" class="guest-note" style="display:none;background:#f0ece6;">
+      Datos cargados desde tu cuenta. Puedes modificarlos si lo deseas.
+    </div>
+
+    <div class="pse-amount-box">
+      <span>Total a pagar</span>
+      <span id="pseAmt">$0</span>
+    </div>
+    <div class="f-grid">
+      <div class="fg">
+        <label>Tipo de Persona</label>
+        <select id="tipoPer"><option value="N">Natural</option><option value="J">Jurídica</option></select>
+      </div>
+      <div class="fg">
+        <label>Tipo de Documento</label>
+        <select id="tipoDoc">
+          <option value="CC">Cédula de Ciudadanía</option>
+          <option value="NIT">NIT</option>
+          <option value="CE">Cédula Extranjería</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Número de Documento</label>
+        <input type="text" id="numDoc" placeholder="1234567890" maxlength="10" minlength="6" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+      </div>
+      <div class="fg">
+        <label>Banco</label>
+        <select id="banco">
+          <option value="1007">Bancolombia</option>
+          <option value="1006">Banco de Bogotá</option>
+          <option value="1009">Davivienda</option>
+          <option value="1040">Banco Agrario</option>
+          <option value="1013">BBVA Colombia</option>
+        </select>
+      </div>
+      <div class="fg f-full">
+        <label>Nombre</label>
+        <input type="text" id="nombreCliente" placeholder="Tu nombre" maxlength="60" oninput="this.value=this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,'')">
+      </div>
+      <div class="fg f-full">
+        <label>Correo Electrónico</label>
+        <input type="email" id="emailCliente" placeholder="correo@ejemplo.com" maxlength="50">
+      </div>
+    </div>
+    <button class="confirm-btn" onclick="procesarPago()">Confirmar Pago</button>
+    <div class="pse-loading" id="pseLoading">Procesando con PSE...</div>
+    <div class="pse-success" id="pseSuccess">
+      <h3>Transacción Iniciada</h3>
+      <p>Tu pago fue enviado a PSE. Recibirás confirmación en tu correo.</p>
+      <div class="txn-ref" id="txnRef">Referencia: —</div>
+      <span class="estado">Estado: PENDIENTE</span>
+      <div style="margin-top:1.5rem;">
+        <button class="btn btn-outline" style="color:#fff;border-color:#444;" onclick="showPage('home')">Volver al inicio</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PERFIL -->
+<div id="perfil" class="page">
+  <div class="perfil-wrap">
+    <div class="perfil-header">
+      <div>
+        <div class="section-label">Mi cuenta</div>
+        <h1 id="perfil-titulo">Bienvenida</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:1rem;">
+        <div class="perfil-avatar" id="perfil-avatar">T</div>
+        <button class="btn-cerrar" onclick="cerrarSesion()">Cerrar sesión</button>
+      </div>
+    </div>
+    <div class="perfil-section">
+      <h2>Mis datos</h2>
+      <div class="perfil-info">
+        <div class="perfil-field"><label>Nombre</label><span id="perfil-nombres">—</span></div>
+        <div class="perfil-field"><label>Apellidos</label><span id="perfil-apellidos">—</span></div>
+        <div class="perfil-field"><label>Documento</label><span id="perfil-doc">—</span></div>
+        <div class="perfil-field"><label>Ciudad</label><span id="perfil-ciudad">—</span></div>
+        <div class="perfil-field" style="grid-column:1/-1;"><label>Correo</label><span id="perfil-email">—</span></div>
+      </div>
+      <div style="margin-top:1.5rem;">
+        <div class="section-label" style="margin-bottom:0.8rem;">Cambiar nombre</div>
+        <div style="display:flex;gap:0.8rem;flex-wrap:wrap;">
+          <input type="text" id="nuevo-nombre" placeholder="Nuevo nombre" maxlength="40"
+            style="border:1px solid var(--light);padding:0.7rem 1rem;font-family:inherit;font-size:0.7rem;outline:none;flex:1;min-width:180px;background:var(--white);"
+            oninput="this.value=this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,'')">
+          <button class="btn btn-dark" onclick="cambiarNombre()" style="padding:0.7rem 1.5rem;">Guardar</button>
+        </div>
+      </div>
+    </div>
+    <div class="perfil-section">
+      <h2>Mi carrito actual</h2>
+      <div id="perfil-carrito"><p class="perfil-empty">Tu carrito está vacío.</p></div>
+    </div>
+    <div class="perfil-section">
+      <h2>Historial de mis compras</h2>
+      <div id="perfil-compras"><p class="perfil-empty">Aún no tienes compras registradas.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div id="login" class="page">
+  <div class="pse-wrap">
+    <button class="back-btn" onclick="showPage('home')">← Volver al inicio</button>
+    <h1>Iniciar sesión</h1>
+    <p class="pse-sub-title">Accede a tu cuenta T'essence</p>
+    <div class="f-grid">
+      <div class="fg f-full">
+        <label>Correo Electrónico</label>
+        <input type="email" id="login-email" placeholder="correo@ejemplo.com" maxlength="50" autocomplete="off">
+      </div>
+      <div class="fg f-full">
+        <label>Contraseña</label>
+        <div class="pass-wrap">
+          <input type="password" id="login-password" placeholder="Tu contraseña" maxlength="30" autocomplete="new-password">
+          <button class="pass-eye" type="button" onclick="togglePass('login-password','eye-login')">
+            <i data-lucide="eye" id="eye-login" style="width:16px;height:16px;stroke-width:1.5;"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    <button class="confirm-btn" onclick="iniciarSesion()">Ingresar</button>
+    <div id="login-error" style="display:none;margin-top:1rem;background:#c0392b;padding:1.5rem;">
+      <p style="font-size:0.6rem;letter-spacing:0.1em;color:#fff;" id="login-error-msg"></p>
+    </div>
+    <p style="font-size:0.55rem;letter-spacing:0.12em;color:var(--gray);text-align:center;margin-top:2rem;">
+      ¿No tienes cuenta?
+      <span onclick="showPage('registro')" style="color:var(--gold);cursor:pointer;">Regístrate aquí</span>
+    </p>
+  </div>
+</div>
+
+<!-- REGISTRO -->
+<div id="registro" class="page">
+  <div class="pse-wrap">
+    <button class="back-btn" onclick="showPage('home')">← Volver al inicio</button>
+    <h1>Registro</h1>
+    <p class="pse-sub-title">Crea tu cuenta en T'essence</p>
+    <div class="f-grid">
+      <div class="fg">
+        <label>Tipo de Documento</label>
+        <select id="reg-tipoDoc">
+          <option value="CC">Cédula de Ciudadanía</option>
+          <option value="CE">Cédula Extranjería</option>
+          <option value="NIT">NIT</option>
+          <option value="PA">Pasaporte</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Número de Documento</label>
+        <input type="text" id="reg-numDoc" placeholder="1023456789" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+      </div>
+      <div class="fg">
+        <label>Nombre</label>
+        <input type="text" id="reg-nombres" placeholder="Tu nombre" maxlength="40" oninput="this.value=this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,'')">
+      </div>
+      <div class="fg">
+        <label>Apellidos</label>
+        <input type="text" id="reg-apellidos" placeholder="Tu apellido" maxlength="40" oninput="this.value=this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,'')">
+      </div>
+      <div class="fg f-full">
+        <label>Correo Electrónico</label>
+        <input type="email" id="reg-email" placeholder="correo@ejemplo.com" maxlength="50" autocomplete="off">
+      </div>
+      <div class="fg f-full">
+        <label>Contraseña</label>
+        <div class="pass-wrap">
+          <input type="password" id="reg-password" placeholder="Mínimo 6 caracteres" maxlength="30" autocomplete="new-password">
+          <button class="pass-eye" type="button" onclick="togglePass('reg-password','eye-reg')">
+            <i data-lucide="eye" id="eye-reg" style="width:16px;height:16px;stroke-width:1.5;"></i>
+          </button>
+        </div>
+      </div>
+      <div class="fg">
+        <label>Teléfono</label>
+        <input type="text" id="reg-telefono" placeholder="+573001234567" maxlength="13" oninput="this.value=this.value.replace(/[^0-9+]/g,'')">
+      </div>
+      <div class="fg">
+        <label>Ciudad</label>
+        <input type="text" id="reg-ciudad" placeholder="Medellín" maxlength="30" oninput="this.value=this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g,'')">
+      </div>
+    </div>
+    <button class="confirm-btn" onclick="registrarPersona()">Crear cuenta</button>
+    <div id="reg-loading" class="pse-loading">Registrando...</div>
+    <div id="reg-success" class="pse-success">
+      <h3>Registro exitoso</h3>
+      <p>Tu cuenta ha sido creada. Ya puedes explorar la colección.</p>
+      <div class="txn-ref" id="reg-id"></div>
+      <div style="margin-top:1.5rem;">
+        <button class="btn btn-outline" style="color:#fff;border-color:#444;" onclick="showPage('perfil')">Ver mi perfil</button>
+      </div>
+    </div>
+    <div id="reg-error" style="display:none;margin-top:1rem;background:#c0392b;padding:1.5rem;">
+      <p style="font-size:0.6rem;letter-spacing:0.1em;color:#fff;" id="reg-error-msg"></p>
+    </div>
+    <p style="font-size:0.45rem;letter-spacing:0.1em;color:var(--gray);text-align:center;margin-top:1.5rem;line-height:1.8;">
+      Tus datos están protegidos bajo la Ley 1581 de 2012 — Habeas Data
+    </p>
+    <p style="font-size:0.55rem;letter-spacing:0.12em;color:var(--gray);text-align:center;margin-top:1rem;">
+      ¿Ya tienes cuenta?
+      <span onclick="showPage('login')" style="color:var(--gold);cursor:pointer;">Inicia sesión</span>
+    </p>
+  </div>
+</div>
+
+<footer style="background:var(--black);color:var(--white);padding:3rem;text-align:center;border-top:1px solid rgba(255,255,255,0.06);">
+  <div style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:300;letter-spacing:0.25em;margin-bottom:1rem;">T<span style="color:var(--gold);">'</span>essence</div>
+  <div style="font-size:0.5rem;letter-spacing:0.25em;text-transform:uppercase;color:#666;margin-bottom:0.8rem;">Viste tu esencia</div>
+  <div style="width:40px;height:1px;background:var(--gold);margin:1.2rem auto;"></div>
+  <div style="font-size:0.48rem;letter-spacing:0.15em;color:#555;line-height:2;">
+    &copy; 2026 T'essence — Todos los derechos reservados<br>
+    Comercio electrónico regulado por Ley 527 de 1999 &nbsp;·&nbsp; Protección de datos Ley 1581 de 2012 &nbsp;·&nbsp; Habeas Data
+  </div>
+  <div style="width:40px;height:1px;background:#333;margin:1.2rem auto;"></div>
+  <div style="font-size:0.45rem;letter-spacing:0.2em;text-transform:uppercase;color:#444;">
+    Desarrollado por Valentina Arias · Ingeniería de Software · FUMC 2026
+  </div>
+</footer>
+
+<script>
+const PRODUCTOS=[
+  {id:'prod-001',nombre:'West Fade',cat:'basicas',desc:'Oversized esencial con gráfica varsity desgastada y efecto washed inspirado en el streetwear vintage de Los Ángeles.',precio:84900,stock:60,img:'/img/img4.png'},
+  {id:'prod-002',nombre:'Fade Vision',cat:'basicas',desc:'Diseño térmico abstracto con efecto artístico futurista.',precio:119900,stock:20,img:'/img/img7.png'},
+  {id:'prod-003',nombre:'Nova Heaven',cat:'basicas',desc:'Oversized blanca con gráfica celestial luminosa y detalles minimal inspirados en estética Y2K futurista.',precio:79900,stock:80,img:'/img/img2.png'},
+  {id:'prod-004',nombre:'Eclipse Nova',cat:'premium',desc:'Oversized negra con gráfica estelar futurista y acabado premium inspirado en streetwear nocturno contemporáneo.',precio:94900,stock:45,img:'/img/img1.png'},
+  {id:'prod-005',nombre:'Blue Remedy',cat:'premium',desc:'Camiseta oversized con estética retro universitaria, detalles contrastantes y gráfica handwritten.',precio:109900,stock:30,img:'/img/img5.png'},
+  {id:'prod-006',nombre:'Noir Entity',cat:'premium',desc:'Oversized premium en tono violeta lavado con ilustración minimal darkwear.',precio:139900,stock:20,img:'/img/img6.png'},
+  {id:'prod-007',nombre:'Azure Legacy',cat:'edicion',desc:'Oversized premium con tipografía gothic bold y estética Y2K.',precio:134900,stock:12,img:'/img/img3.png'},
+  {id:'prod-008',nombre:'Virtual Ink',cat:'edicion',desc:'Camiseta oversized con ilustración abstracta estilo brushstroke.',precio:149900,stock:15,img:'/img/img8.png'}
+];
+
+// ═══ ESTADO GLOBAL ═══
+let cart=[], currentProduct=null, selectedSize='S';
+let usuarioActual=null, misCompras=[];
+
+const fmt=n=>'$'+Math.round(n).toLocaleString('es-CO');
+const catLabel=c=>c==='basicas'?'Básicas':c==='premium'?'Premium':'Edición Limitada';
+const getTotal=()=>cart.reduce((a,c)=>a+c.precio*c.qty,0);
+
+// ═══ NOTIFICACION ═══
+function mostrarNotif(msg){
+  const n=document.getElementById('notif');
+  n.innerHTML=msg;n.classList.add('show');
+  setTimeout(()=>n.classList.remove('show'),3500);
+}
+
+// ═══ TOGGLE PASSWORD ═══
+function togglePass(inputId, iconId){
+  const input=document.getElementById(inputId);
+  const icon=document.getElementById(iconId);
+  if(input.type==='password'){
+    input.type='text';
+    icon.setAttribute('data-lucide','eye-off');
+  } else {
+    input.type='password';
+    icon.setAttribute('data-lucide','eye');
+  }
+  lucide.createIcons();
+}
+
+// ═══ SESION ═══
+function activarSesion(persona){
+  usuarioActual=persona;
+  document.getElementById('nav-registro-link').style.display='none';
+  document.getElementById('nav-login-link').style.display='none';
+  document.getElementById('nav-perfil-link').style.display='';
+}
+
+function cerrarSesion(){
+  // Solo guarda compras, borra todo lo demás
+  usuarioActual=null;
+  // NO borramos misCompras para mantener historial
+  document.getElementById('nav-registro-link').style.display='';
+  document.getElementById('nav-login-link').style.display='';
+  document.getElementById('nav-perfil-link').style.display='none';
+  // Limpiar formularios
+  limpiarFormLogin();
+  limpiarFormRegistro();
+  mostrarNotif('Sesion cerrada. <span>Hasta pronto!</span>');
+  showPage('home');
+}
+
+function limpiarFormLogin(){
+  const e=document.getElementById('login-email');
+  const p=document.getElementById('login-password');
+  if(e)e.value='';
+  if(p){p.value='';p.type='password';}
+  const err=document.getElementById('login-error');
+  if(err)err.style.display='none';
+  const icon=document.getElementById('eye-login');
+  if(icon)icon.setAttribute('data-lucide','eye');
+  lucide.createIcons();
+}
+
+function limpiarFormRegistro(){
+  ['reg-numDoc','reg-nombres','reg-apellidos','reg-email','reg-password','reg-telefono','reg-ciudad'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.value='';if(el.type==='password')el.type='password';}
+  });
+  const err=document.getElementById('reg-error');
+  if(err)err.style.display='none';
+  const suc=document.getElementById('reg-success');
+  if(suc)suc.classList.remove('show');
+  const icon=document.getElementById('eye-reg');
+  if(icon)icon.setAttribute('data-lucide','eye');
+  lucide.createIcons();
+}
+
+function irACuenta(){
+  if(usuarioActual) showPage('perfil');
+  else showPage('login');
+}
+
+function cambiarNombre(){
+  const nuevo=document.getElementById('nuevo-nombre').value.trim();
+  if(!nuevo||nuevo.length<2){alert('Ingresa un nombre válido.');return;}
+  usuarioActual.nombres=nuevo;
+  document.getElementById('perfil-nombres').textContent=nuevo;
+  document.getElementById('perfil-titulo').textContent='Hola, '+nuevo;
+  document.getElementById('perfil-avatar').textContent=nuevo[0].toUpperCase();
+  document.getElementById('nuevo-nombre').value='';
+  mostrarNotif('Nombre actualizado a <span>'+nuevo+'</span>');
+}
+
+function renderPerfil(){
+  if(!usuarioActual)return;
+  document.getElementById('perfil-titulo').textContent='Hola, '+usuarioActual.nombres;
+  document.getElementById('perfil-avatar').textContent=usuarioActual.nombres[0].toUpperCase();
+  document.getElementById('perfil-nombres').textContent=usuarioActual.nombres;
+  document.getElementById('perfil-apellidos').textContent=usuarioActual.apellidos;
+  document.getElementById('perfil-doc').textContent=usuarioActual.tipoDoc+' ****'+usuarioActual.numDoc.slice(-4);
+  document.getElementById('perfil-ciudad').textContent=usuarioActual.ciudad||'—';
+  document.getElementById('perfil-email').textContent=usuarioActual.email;
+
+  // Carrito actual
+  const carritoEl=document.getElementById('perfil-carrito');
+  carritoEl.innerHTML=cart.length===0
+    ?'<p class="perfil-empty">Tu carrito está vacío.</p>'
+    :cart.map(c=>`
+      <div class="perfil-compra">
+        <div class="perfil-compra-img"><img src="${c.img}" alt="${c.nombre}"></div>
+        <div><div class="perfil-compra-name">${c.nombre}</div>
+        <div class="perfil-compra-meta">Talla ${c.size} · Qty ${c.qty}</div></div>
+        <div class="perfil-compra-price">${fmt(c.precio*c.qty)}</div>
+      </div>`).join('');
+
+  // Compras realizadas
+  const comprasEl=document.getElementById('perfil-compras');
+  comprasEl.innerHTML=misCompras.length===0
+    ?'<p class="perfil-empty">Aún no tienes compras registradas.</p>'
+    :misCompras.map(c=>`
+      <div class="perfil-compra">
+        <div class="perfil-compra-img"><img src="${c.img}" alt="${c.nombre}"></div>
+        <div><div class="perfil-compra-name">${c.nombre}</div>
+        <div class="perfil-compra-meta">Talla ${c.size} · Qty ${c.qty}</div></div>
+        <div class="perfil-compra-price">${fmt(c.precio*c.qty)}</div>
+      </div>`).join('');
+}
+
+// ═══ AUTOCOMPLETAR PSE ═══
+function autocompletarPSE(){
+  // Limpiar siempre primero
+  document.getElementById('numDoc').value='';
+  document.getElementById('nombreCliente').value='';
+  document.getElementById('emailCliente').value='';
+
+  const guestNote=document.getElementById('pse-guest-note');
+  const userNote=document.getElementById('pse-user-note');
+
+  if(usuarioActual){
+    // Autocompletar con datos del usuario
+    const sel=document.getElementById('tipoDoc');
+    for(let i=0;i<sel.options.length;i++){
+      if(sel.options[i].value===usuarioActual.tipoDoc){sel.selectedIndex=i;break;}
+    }
+    document.getElementById('numDoc').value=usuarioActual.numDoc;
+    document.getElementById('nombreCliente').value=usuarioActual.nombres;
+    document.getElementById('emailCliente').value=usuarioActual.email;
+    guestNote.style.display='none';
+    userNote.style.display='block';
+  } else {
+    // Invitado: campos vacíos
+    guestNote.style.display='block';
+    userNote.style.display='none';
+  }
+}
+
+// ═══ NAVEGACION ═══
+function setBN(id){document.querySelectorAll('.bn-item').forEach(b=>b.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+  if(id==='home')renderHome();
+  if(id==='catalog')renderCatalog('all');
+  if(id==='cart')renderCart();
+  if(id==='perfil')renderPerfil();
+  if(id==='pse'){
+    document.getElementById('pseAmt').textContent=fmt(Math.round(getTotal()*1.19));
+    document.getElementById('pseSuccess').classList.remove('show');
+    document.getElementById('pseLoading').classList.remove('show');
+    autocompletarPSE();
+  }
+  if(id==='login') limpiarFormLogin();
+  if(id==='registro') limpiarFormRegistro();
+}
+
+function renderHome(){
+  document.getElementById('homeGrid').innerHTML=PRODUCTOS.slice(0,4).map(p=>`
+    <div class="home-card" onclick="showDetail('${p.id}')">
+      <div class="home-card-img"><img src="${p.img}" alt="${p.nombre}" loading="lazy"></div>
+      <div class="home-card-cat">${catLabel(p.cat)}</div>
+      <div class="home-card-name">${p.nombre}</div>
+      <div class="home-card-price">${fmt(p.precio)} COP</div>
+    </div>`).join('');
+}
+
+function renderCatalog(cat){
+  const f=cat==='all'?PRODUCTOS:PRODUCTOS.filter(p=>p.cat===cat);
+  document.getElementById('catalogCount').textContent=f.length+' piezas disponibles';
+  document.getElementById('catalogGrid').innerHTML=f.map(p=>`
+    <div class="prod-card" onclick="showDetail('${p.id}')">
+      <div class="prod-img"><img src="${p.img}" alt="${p.nombre}" loading="lazy"></div>
+      <div class="prod-info">
+        <div class="prod-cat">${catLabel(p.cat)}</div>
+        <div class="prod-name">${p.nombre}</div>
+        <div class="prod-price">${fmt(p.precio)} COP</div>
+      </div>
+      <button class="prod-add" onclick="event.stopPropagation();quickAdd('${p.id}')">+</button>
+    </div>`).join('');
+}
+
+function filterCat(cat,btn){document.querySelectorAll('.filter').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderCatalog(cat);}
+
+function showDetail(id){
+  currentProduct=PRODUCTOS.find(p=>p.id===id);selectedSize='S';
+  document.getElementById('d-img').src=currentProduct.img;
+  document.getElementById('d-img').alt=currentProduct.nombre;
+  document.getElementById('d-cat').textContent=catLabel(currentProduct.cat);
+  document.getElementById('d-name').textContent=currentProduct.nombre;
+  document.getElementById('d-price').textContent=fmt(currentProduct.precio)+' COP';
+  document.getElementById('d-desc').textContent=currentProduct.desc;
+  document.getElementById('d-stock').textContent=currentProduct.stock+' unidades disponibles';
+  document.getElementById('d-chip').textContent='Talla S';
+  document.querySelectorAll('.sz').forEach(b=>{b.classList.remove('active');if(b.textContent==='S')b.classList.add('active');});
+  showPage('detail');
+}
+
+function pickSize(btn,size){document.querySelectorAll('.sz').forEach(b=>b.classList.remove('active'));btn.classList.add('active');selectedSize=size;document.getElementById('d-chip').textContent='Talla '+size;}
+function quickAdd(id){addToCart(PRODUCTOS.find(x=>x.id===id),'M');}
+
+function addToCart(p,size){
+  const ex=cart.find(c=>c.id===p.id&&c.size===size);
+  if(ex)ex.qty++;else cart.push({...p,size,qty:1});
+  updateCartCount();
+}
+
+function addFromDetail(){if(!currentProduct)return;addToCart(currentProduct,selectedSize);showPage('cart');}
+
+function updateCartCount(){
+  const n=cart.reduce((a,c)=>a+c.qty,0);
+  document.getElementById('cartCount').textContent=n;
+  document.getElementById('cartCountMobile').textContent=n;
+}
+
+function renderCart(){
+  const list=document.getElementById('cartList');
+  const n=cart.reduce((a,c)=>a+c.qty,0);
+  document.getElementById('cartSubtitle').textContent=n+' producto'+(n!==1?'s':'');
+  if(cart.length===0){
+    list.innerHTML=`<div class="cart-empty-state"><p>Tu carrito está vacío</p><button class="btn btn-dark" onclick="showPage('catalog')">Explorar colección</button></div>`;
+  }else{
+    list.innerHTML=cart.map((c,i)=>`
+      <div class="c-item">
+        <div class="c-img"><img src="${c.img}" alt="${c.nombre}"></div>
+        <div>
+          <div class="c-name">${c.nombre}</div>
+          <div class="c-meta">Talla ${c.size} · Qty ${c.qty}</div>
+          <button class="c-remove" onclick="removeItem(${i})">Eliminar</button>
+        </div>
+        <div class="c-price">${fmt(c.precio*c.qty)}</div>
+      </div>`).join('');
+  }
+  const sub=getTotal();
+  document.getElementById('sumSub').textContent=fmt(sub);
+  document.getElementById('sumIva').textContent=fmt(sub*0.19);
+  document.getElementById('sumTotal').textContent=fmt(sub*1.19);
+}
+
+function removeItem(i){cart.splice(i,1);updateCartCount();renderCart();}
+
+// ═══ LOGIN ═══
+async function iniciarSesion(){
+  const email=document.getElementById('login-email').value.trim();
+  const password=document.getElementById('login-password').value;
+  if(!email||!password){
+    document.getElementById('login-error-msg').textContent='Por favor ingresa tu correo y contraseña.';
+    document.getElementById('login-error').style.display='block';return;
+  }
+  try{
+    const res=await fetch('/api/personas/login',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email,password})
+    });
+    const data=await res.json();
+    if(!res.ok){
+      document.getElementById('login-error-msg').textContent=data.mensaje||'Correo o contraseña incorrectos.';
+      document.getElementById('login-error').style.display='block';
+      // Limpiar solo contraseña, no email
+      document.getElementById('login-password').value='';
+      return;
+    }
+    activarSesion(data.persona);
+    limpiarFormLogin();
+    mostrarNotif('Bienvenida <span>'+data.persona.nombres+'</span>');
+    showPage('perfil');
+  }catch(e){
+    document.getElementById('login-error-msg').textContent='Error al conectar con el servidor.';
+    document.getElementById('login-error').style.display='block';
+  }
+}
+
+// ═══ REGISTRO ═══
+async function registrarPersona(){
+  const tipoDoc=document.getElementById('reg-tipoDoc').value;
+  const numDoc=document.getElementById('reg-numDoc').value.trim();
+  const nombres=document.getElementById('reg-nombres').value.trim();
+  const apellidos=document.getElementById('reg-apellidos').value.trim();
+  const email=document.getElementById('reg-email').value.trim();
+  const password=document.getElementById('reg-password').value;
+  const telefono=document.getElementById('reg-telefono').value.trim();
+  const ciudad=document.getElementById('reg-ciudad').value.trim();
+
+  if(!tipoDoc||!numDoc||!nombres||!apellidos||!email||!password){
+    document.getElementById('reg-error-msg').textContent='Por favor completa todos los campos obligatorios.';
+    document.getElementById('reg-error').style.display='block';return;
+  }
+  if(password.length<6){
+    document.getElementById('reg-error-msg').textContent='La contraseña debe tener mínimo 6 caracteres.';
+    document.getElementById('reg-error').style.display='block';return;
+  }
+
+  document.getElementById('reg-loading').classList.add('show');
+  document.getElementById('reg-success').classList.remove('show');
+  document.getElementById('reg-error').style.display='none';
+
+  try{
+    const res=await fetch('/api/personas',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({tipoDoc,numDoc,nombres,apellidos,email,password,telefono,ciudad})
+    });
+    const data=await res.json();
+    if(res.status===409){
+      document.getElementById('reg-error-msg').textContent='Ya existe una cuenta con ese documento o correo.';
+      document.getElementById('reg-error').style.display='block';
+      document.getElementById('reg-loading').classList.remove('show');return;
+    }
+    if(!res.ok){
+      document.getElementById('reg-error-msg').textContent=data.mensaje||'Error al crear la cuenta.';
+      document.getElementById('reg-error').style.display='block';
+      document.getElementById('reg-loading').classList.remove('show');return;
+    }
+    document.getElementById('reg-id').textContent='ID de cliente: '+data.id;
+    document.getElementById('reg-success').classList.add('show');
+    activarSesion(data);
+    mostrarNotif('Bienvenida <span>'+data.nombres+'</span> a T\'essence');
+  }catch(e){
+    document.getElementById('reg-error-msg').textContent='Error al conectar con el servidor.';
+    document.getElementById('reg-error').style.display='block';
+  }
+  document.getElementById('reg-loading').classList.remove('show');
+}
+
+// ═══ PAGO PSE ═══
+async function procesarPago(){
+  const numDoc=document.getElementById('numDoc').value.trim();
+  const nombre=document.getElementById('nombreCliente').value.trim();
+  const email=document.getElementById('emailCliente').value.trim();
+
+  if(!numDoc||!nombre||!email){alert('Por favor completa todos los campos.');return;}
+  if(numDoc.length<6){alert('El número de documento debe tener mínimo 6 dígitos.');return;}
+  if(nombre.length<2){alert('El nombre debe tener mínimo 2 caracteres.');return;}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){alert('El correo electrónico no es válido.');return;}
+  if(cart.length===0){alert('Tu carrito está vacío.');return;}
+
+  const monto=Math.round(getTotal()*1.19);
+  document.getElementById('pseLoading').classList.add('show');
+  document.getElementById('pseSuccess').classList.remove('show');
+
+  try{
+    await fetch('/api/pedidos',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({cliente:nombre,productos:cart.map(c=>c.id),total:monto})});
+
+    const res=await fetch('/api/pagos-pse',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        banco_codigo:document.getElementById('banco').value,
+        tipo_persona:document.getElementById('tipoPer').value,
+        tipo_documento:document.getElementById('tipoDoc').value,
+        numero_documento:numDoc,
+        monto,
+        descripcion:"Compra T'essence — "+cart.map(c=>c.nombre).join(', '),
+        url_respuesta:'https://tessence.co/pagos/respuesta'
+      })});
+
+    const data=await res.json();
+    if(data.estado==='RECHAZADO'){
+      document.getElementById('pseLoading').classList.remove('show');
+      alert('Transaccion rechazada. Verifica tus datos bancarios e intenta nuevamente.');return;
+    }
+    document.getElementById('txnRef').textContent='Referencia: '+data.referencia;
+  }catch(e){
+    document.getElementById('txnRef').textContent='Referencia: TXN-'+Date.now();
+  }
+
+  document.getElementById('pseLoading').classList.remove('show');
+  document.getElementById('pseSuccess').classList.add('show');
+
+  // Guardar compras solo si hay sesion activa
+  if(usuarioActual) misCompras=[...misCompras,...cart];
+  cart=[];updateCartCount();
+}
+
+renderHome();
+lucide.createIcons();
+</script>
+</body>
+</html>

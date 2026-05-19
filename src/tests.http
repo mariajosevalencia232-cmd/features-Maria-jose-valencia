@@ -1,0 +1,76 @@
+@baseUrl = http://localhost:3000
+
+### GET todos los productos
+GET {{baseUrl}}/api/productos
+
+### GET producto por ID
+GET {{baseUrl}}/api/productos/prod-001
+
+### POST crear producto
+POST {{baseUrl}}/api/productos
+Content-Type: application/json
+
+{
+  "nombre": "Jugo de Mango",
+  "descripcion": "Jugo natural de mango",
+  "precio": 3500,
+  "stock": 50,
+  "categoria": "bebidas",
+  "imagen_url": "https://coquito.com/img/mango.jpg"
+}
+
+### PUT actualizar producto
+PUT {{baseUrl}}/api/productos/prod-001
+Content-Type: application/json
+
+{
+  "nombre": "Coquito Tropical Editado",
+  "precio": 5000
+}
+
+### DELETE eliminar producto
+DELETE {{baseUrl}}/api/productos/prod-003
+
+### GET todos los pedidos
+GET {{baseUrl}}/api/pedidos
+
+### POST crear pedido
+POST {{baseUrl}}/api/pedidos
+Content-Type: application/json
+
+{
+  "cliente": "María García",
+  "productos": ["prod-001", "prod-002"],
+  "total": 11500
+}
+
+### POST pago PSE
+POST {{baseUrl}}/api/pagos-pse
+Content-Type: application/json
+
+{
+  "banco_codigo": "1007",
+  "tipo_persona": "N",
+  "tipo_documento": "CC",
+  "numero_documento": "1234567890",
+  "monto": 45000,
+  "descripcion": "Compra tienda Coquito Amarillo",
+  "url_respuesta": "https://coquito.com/pagos/respuesta"
+}
+
+### GET consultar pago PSE (reemplaza TXN con la referencia que te devuelva)
+GET {{baseUrl}}/api/pagos-pse/TXN-123456
+
+### GET pedido por ID
+GET {{baseUrl}}/api/pedidos/ped-001
+
+### PUT actualizar pedido
+PUT {{baseUrl}}/api/pedidos/ped-001
+Content-Type: application/json
+
+{
+  "estado": "APROBADO"
+}
+
+### DELETE eliminar pedido
+DELETE {{baseUrl}}/api/pedidos/ped-001
