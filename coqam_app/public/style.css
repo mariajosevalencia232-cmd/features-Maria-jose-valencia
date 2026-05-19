@@ -343,11 +343,10 @@ nav ul li a:hover { color: #c58b00; }
 }
 
 .modal-body img {
-    width: 340px;
-    height: 340px;
-    object-fit: cover;
-    border-radius: 18px;
-    flex-shrink: 0;
+    width: 350px;
+    height: 350px;
+    object-fit: contain;
+    background: #f5f5f5;
 }
 
 .modal-info {
