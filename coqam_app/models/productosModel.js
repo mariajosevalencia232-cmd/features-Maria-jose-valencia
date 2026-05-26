@@ -1,6 +1,4 @@
-// models/productosModel.js
-
-let productos = [
+ [
     {
         id: "001",
         nombre: "VELA AROMATICA DE COCO CON HIERBABUENA",
@@ -78,7 +76,7 @@ let productos = [
         nombre: "JABON ARTESANAL MIEL DORADA",
         descripcion: "El jabón clásico de la colmena. Nutre profundamente la piel seca gracias a las propiedades hidratantes de la miel pura, dejando una textura sedosa, suave y una delicada protección.",
         precio: 80000,
-        stock: 5,
+        stock: 8,
         categoria: "Jabones artesanales",
         activo: true
     },
@@ -96,7 +94,7 @@ let productos = [
         nombre: "JABON ARTESANAL CARBON DETOX",
         descripcion: "El aliado perfecto para una limpieza profunda. El carbón activado absorbe las impurezas, toxinas y el exceso de grasa de los poros, dejando tu piel fresca y renovada.",
         precio: 85000,
-        stock: 5,
+        stock: 55,
         categoria: "Jabones artesanales",
         activo: true
     },
@@ -105,7 +103,7 @@ let productos = [
         nombre: "JABON ARTESANAL COCO NUBE",
         descripcion: "Sumérgete en una espuma cremosa. Elaborado con base de aceite de coco, este jabón restaura la elasticidad natural de la piel, proporcionando una humectación intensiva.",
         precio: 80000,
-        stock: 5,
+        stock: 7,
         categoria: "Jabones artesanales",
         activo: true
     },
@@ -114,7 +112,7 @@ let productos = [
         nombre: "JABON ARTESANAL ROSA PASTEL",
         descripcion: "Infundido con sutiles extractos florales que cuidan tu cuerpo. Limpia con total delicadeza, ayudando a mantener el balance natural de hidratación cutánea.",
         precio: 80000,
-        stock: 5,
+        stock: 10,
         categoria: "Jabones artesanales",
         activo: true
     },
@@ -123,7 +121,7 @@ let productos = [
         nombre: "JABON ARTESANAL CACAO MENTA",
         descripcion: "Una experiencia de ducha estimulante. La riqueza antioxidante del cacao se une al poder refrescante de la menta pura, activando la piel y dejándola tersa.",
         precio: 80000,
-        stock: 5,
+        stock: 3,
         categoria: "Jabones artesanales",
         activo: true
     },
@@ -132,7 +130,7 @@ let productos = [
         nombre: "JABON ARTESANAL MARACUYA",
         descripcion: "Disfruta de una exfoliación suave y un aroma frutal irresistible. Ayuda a remover células muertas suavemente, devolviéndole la luminosidad natural a tu piel.",
         precio: 80000,
-        stock: 5,
+        stock: 0 ,
         categoria: "Jabones artesanales",
         activo: true
     },
